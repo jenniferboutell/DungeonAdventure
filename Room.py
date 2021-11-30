@@ -1,17 +1,48 @@
+import random
+
 class Room:
 
-    def __init__(self, healing_potion, pit, entrance, exit, pillars, doors, vision_potion):
-        """Contains default constructor and all methods you deem necessary -- modular design is CRUCIAL """
-        self.healing_potion = False
-        self.pit = False
-        self.entrance = False
-        self.exit = False
+    def __init__(self, healing_potion = False, pit = False, entrance = False, exit = False, pillars = [], \
+                 doors = ["N", "S", "E", "W"], vision_potion = False, x = 0, y = 0):
         self.pillars = []
-        self.doors = ["N","S","E","W"]
-        self.vision_potion = False
+        """Contains default constructor and all methods you deem necessary -- modular design is CRUCIAL """
+
+
+    def count_contents(self, contents = 0):
+        if self.healing_potion == True:
+            contents += 1
+        if self.pit == True:
+            contents += 1
+        if self.vision_potion == True:
+            contents += 1
+        if self.pillars != []:
+            contents += 1
+
+        print(contents)
+        if contents > 1:
+            print("Multiple objects example")
+        else:
+            print("All the if statements will be needed for this one")
+
 
     def __str__(self):
         pass
+
+    def set_room(self, percent = 10):
+        self.healing_potion = random.randrange(100) < percent
+        self.pit = random.randrange(100) < percent
+        self.vision_potion = random.randrange(100) < percent
+        self.pillars = ["I"]
+        print(str(self.healing_potion) + " Healing Potion \n" + str(self.pit) + " Pit\n" + str(self.vision_potion) + \
+              " Vision Potion \n" + self.pillars[0] )
+
+room = Room()
+room.set_room()
+room.count_contents()
+room.__str__()
+
+
+
 
 
 
