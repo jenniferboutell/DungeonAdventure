@@ -25,5 +25,26 @@ class Adventurer:
         self.__hit_points = self.__hit_points - pit_damage
         print("Your Heath: " + self.__hit_points)
 
+    # def healing potion pick up, increase healing potion by 1 in inventory
+    def healing_pickup(self,):
+        self.__healing_potion = self.__healing_potion + 1
+
+    # def drink healing potion, increase hit points by 15, decrease healing potion by 1
+    def drink_healing_potion(self, hit_points):
+        self.__hit_points = self.__hit_points + 15
+        self.__healing_potion = self.__healing_potion - 1
+
+    # def vision potion pick up, increase vision potion by 1 in inventory
+    def vision_potion(self):
+        self.__vision_potion = self.__vision_potion + 1
+
+    # def drink vision potion, decrease vision potion by 1 in inventory
+    def drink_vision_potion(self):
+        self.__vision_potion = self.__vision_potion - 1
+
+    # pick up pillar, increase
+    def pillar_pickup(self, pillar_name):
+        self.__pillars.append(pillar_name)
+
 
     
