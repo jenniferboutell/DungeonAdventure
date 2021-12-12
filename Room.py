@@ -139,9 +139,6 @@ class Room:
             print("All the if statements will be needed for this one")
 
 
-    def __str__(self):
-        pass
-
     def set_room(self, percent = 10):
         self.healing_potion = random.randrange(100) < percent
         self.pit = random.randrange(100) < percent
