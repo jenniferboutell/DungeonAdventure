@@ -132,9 +132,10 @@ class MockAdventurer:
 
 class MockGame:
 
-    def __init__(self, rounds: int = 4):
+    def __init__(self, rounds: int = 10):
         self.__rounds = rounds
         self.__hero = MockAdventurer()
+        self.__io = AdventurerInput(self)
 
     @property
     def hero(self):
@@ -148,12 +149,15 @@ class MockGame:
             self.__rounds -= 1
         return bool(self.__rounds)
 
+    def play(self):
+        self.__io.start()
+        while self.continues():
+            self.__io.prompt()
+        self.__io.finish()
+
 
 if __name__ == "__main__":
     g_game = MockGame()
-    g_io = AdventurerInput(g_game)
-    g_io.start()
-    while g_game.continues():
-        g_io.prompt()
+    g_game.play()
 
 # END

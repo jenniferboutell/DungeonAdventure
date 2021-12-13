@@ -3,7 +3,8 @@
 
 class Adventurer:
 
-    def __init__(self, name: str = None, hit_points: int = 20):
+    def __init__(self, game, name: str = None, hit_points: int = 20):
+        self.__game = game
         self.__name: str = name
         self.__hit_points: int = hit_points
         self.__healing_potions: int = 0
@@ -38,9 +39,18 @@ class Adventurer:
 
     def use_vision_potion(self):
         self.__vision_potions -= 1
-        # TODO adjust visible rooms (prob via another class)
+        # TODO adjust visible rooms, hand off to Game for this
+        # return self.__game.envision()
 
     def gain_pillar(self, pillar_name):
         self.__pillars.add(pillar_name)
+
+    def move(self, direction) -> bool:
+        """ Try to step in a a direction.
+        Return True if successful, False if cannot.
+        """
+        # TODO traverse to adjacent room hand off to Game for this.
+        # return self.__game.traverse(direction)
+        return True
 
 # END
