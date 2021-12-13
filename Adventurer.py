@@ -24,7 +24,12 @@ class Adventurer:
 
     def take_damage(self, damage: int = 10):
         self.__hit_points -= damage
+        if self.__hit_points <= 0:
+            self.dissolve()
         # FIXME if down to zero, dies
+
+    def dissolve(self):
+        print("Your molecules have dissolved and become one with the universe.")
 
     def gain_healing_potion(self,):
         self.__healing_potions += 1
@@ -32,6 +37,8 @@ class Adventurer:
     def use_healing_potion(self, hit_points: int = 15):
         self.__healing_potions -= 1
         self.__hit_points += hit_points
+        if self.__hit_points > 100:
+            self.__hit_points = 100
         # FIXME cannot exceed some max threshold
 
     def gain_vision_potion(self):
