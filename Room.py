@@ -1,12 +1,126 @@
 import random
+from typing import Optional
+from Compass import *
+
+
+class RoomStyle:
+    corner = "+"
+    wall_n = "-----"
+    wall_s = wall_n
+    door_n = "--H--"
+    door_s = door_n
+    wall_w = "|"
+    wall_e = wall_w
+    door_w = "="
+    door_e = door_w
+
+
+class RoomStyleTom:
+    corner = "*"
+    wall_n = "*****"
+    wall_s = wall_n
+    door_n = "* - *"
+    door_s = door_n
+    wall_w = "*"
+    wall_e = wall_w
+    door_w = "|"
+    door_e = door_w
+
+
+class RoomStr:
+
+    def __init__(self, _room, skip_north=None, skip_west=None, style=RoomStyle):
+        skip_north = bool(skip_north)
+        skip_west = bool(skip_west)
+        self.lines = []
+
+        # top
+        if not skip_north:
+            line = ""
+            if not skip_west:
+                line += style.corner
+            if _room.has_door(North):
+                line += style.door_n
+            else:
+                line += style.wall_n
+            line += style.corner
+            self.lines.append(line)
+
+        # west/middle/east
+        line = ""
+        if not skip_west:
+            if _room.has_door(West):
+                line += style.door_w
+            else:
+                line += style.wall_w
+        r = str(_room)
+        line += f" {r:<3} "
+        if _room.has_door(East):
+            line += style.door_e
+        else:
+            line += style.wall_e
+        self.lines.append(line)
+
+        # bottom
+        line = ""
+        if not skip_west:
+            line += style.corner
+        if _room.has_door(South):
+            line += style.door_s
+        else:
+            line += style.wall_s
+        line += style.corner
+        self.lines.append(line)
+
+    def __str__(self):
+        return "".join([f"{line}\n" for line in self.lines])
+
 
 class Room:
 
-    def __init__(self, healing_potion = False, pit = False, entrance = False, exit = False, pillars = [], \
-                 doors = ["N", "S", "E", "W"], vision_potion = False, x = 0, y = 0):
+    def __init__(self, grid=None, x=None, y=None, healing_potion = False, pit = False, entrance = False, exit = False, pillars = [], \
+                 doors = ["N", "S", "E", "W"], vision_potion = False) -> None:
+        self.__grid = grid
+        self.__x = x
+        self.__y = y
+        self.__doors = [False] * 4
         self.pillars = []
-        """Contains default constructor and all methods you deem necessary -- modular design is CRUCIAL """
 
+
+    @property
+    def grid(self):
+        return self.__grid
+
+    @property
+    def x(self) -> Optional[int]:
+        """ East-west position of room within grid, if any.
+            Zero-based from west. None if not in grid. """
+        if self.grid is None:
+            return None
+        return self.__x
+
+    @property
+    def y(self) -> Optional[int]:
+        """ North-south position of room within grid, if any.
+            Zero-based from north. None if not in grid. """
+        if self.grid is None:
+            return None
+        return self.__y
+
+    def has_door(self, direction) -> bool:
+        return self.__doors[direction.ordinal]
+
+    def add_door(self, direction):
+        self.__doors[direction.ordinal] = True
+
+    def __str__(self) -> str:
+        if self.grid is not None:
+            return f"{self.x},{self.y}"
+        else:
+            return "?"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def count_contents(self, contents = 0):
         if self.healing_potion == True:
@@ -25,9 +139,6 @@ class Room:
             print("All the if statements will be needed for this one")
 
 
-    def __str__(self):
-        pass
-
     def set_room(self, percent = 10):
         self.healing_potion = random.randrange(100) < percent
         self.pit = random.randrange(100) < percent
@@ -36,20 +147,12 @@ class Room:
         print(str(self.healing_potion) + " Healing Potion \n" + str(self.pit) + " Pit\n" + str(self.vision_potion) + \
               " Vision Potion \n" + self.pillars[0] )
 
-room = Room()
-room.set_room()
-room.count_contents()
-room.__str__()
-
-
-
-
-
-
-
-
-
-
+if __name__ == '__main__':
+    print(f"Greetings from Room!")
+    room = Room()
+    print(f"solo room: {room}")
+    room = Room(x=2, y=3)
+    print(f"grid room: {room}")
 
 
 """
