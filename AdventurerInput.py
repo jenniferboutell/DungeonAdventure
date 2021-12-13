@@ -1,74 +1,159 @@
-from Room import Room
+from random import randrange
+
+# from DungeonAdventure import DungeonAdventure
+# from Adventurer import Adventurer
+# from Room import Room
+
 
 class AdventurerInput:
 
-    def __init__(self, name):
-        self.name = None
+    def __init__(self, game):
+        self.__game = game
+
+    @property
+    def game(self):
+        return self.__game
+
+    @property
+    def hero(self):
+        return self.game.hero
+
+    @property
+    def name(self):
+        return self.hero.name
+
+    def set_name(self, val):
+        self.hero.set_name(val)
 
     def start(self):
-        start_option = input("Would you like to play a game? (yes/no)")
-        if start_option == "yes":
-            print("Huzzah! Welcome to Dungeon Adventure, Adventurer")
-            self.name = input("What is your name, brave warrior?")
-            self.move(self)
-        else:
-            print("Commence global thermonuclear war")
-            print(". \n. \n. \n. \n. \n. \n. \n. \n. \n. \n. \n. \n. \n. \n. \n. \n tick")
-            print(".....just kidding")
-            self.start(self)
+        start_option = input("Shall we play a game? (Y/N)\n")
+        if start_option == "no":
+            print("Commence global thermonuclear war in 3... 2... 1...")
+            print(".....haha, not really. That is scheduled for tomorrow.")
 
+        print("Huzzah! Welcome to Dungeon Adventure, Adventurer")
+        name = input("What is your name, brave warrior?\n")
+        # FIXME basic validation of name
+        # TODO strip() surrounding whitespace
+        self.set_name(name)
+        self.menu()
+        self.prompt()
 
+    def finish(self):
+        print(f"Brave Sir {self.name} is at The End.")
+        # TODO report what kind of ending
 
-    def move(self):
-        print("Menu: Go North = N, Go South = S, Go East = E, Go West = W, Use Vision Potion = V, Use Healing Potion = H, Help = help, Q = Quit Game")
-        #Will need to pass in map here, or at least the four surrounding squares
-        move_option = input("What would you like to do, brave Sir " + self.name + "?")
-        #help
-        #showmap
-        #showfullmap - create funny command option for this
-        #or - just print the full menu for each move.
+    @staticmethod
+    def menu():
+        print("Here are your options...\n",
+              "Move (N)orth, (S)outh, (E)ast, or (W)est;\n",
+              "Use (V)ision Potion or (H)ealing Potion;\n"
+              "Show (M)ap; (Q)uit the game; or (?) to get help")
+        # Do NOT reveal the hidden '@' option to show full map
 
-        if move_option == "N":
-            print("There is no room North of your position")
-            print("Brave, Brave, Brave Brave Sir " + self.name + " did stand still.")
-            self.move(self)
-        #checks to see if there is a room 1 space north of adventurer's position, if so, checks to see if room is
-        #accessible, if yes, sets room to that location.
+    def prompt(self):
+        # Will need to pass in map here, or at least the four surrounding squares
+        option = input(f"What would you like to do, brave Sir {self.name}?\n")
 
-        elif move_option == "S":
-            print("There is no room South of your position")
-            print("Brave, Brave, Brave Brave Sir " + self.name + " did stand still.")
-            self.move(self)
-        # checks to see if there is a room 1 space south of adventurer's position, if so, checks to see if room is
-        #         #accessible, if yes, sets room to that location.
+        if option == '?':
+            self.menu()
 
-        elif move_option == "E":
-            print("There is no room East of your position")
-            print("Brave, Brave, Brave Brave Sir " + self.name + " did stand still.")
-            self.move(self)
-        # checks to see if there is a room 1 space East of adventurer's position, if so, checks to see if room is
-        #         #accessible, if yes, sets room to that location.
+        elif option == "Q":
+            print(f"Brave Sir {self.name} ran away. Brave Brave Brave Brave Sir {self.name}.")
+            self.game.quit()
+            # exit()  # TODO do sys.exit() in main class, not here
 
-        elif move_option == "W":
-            print("There is no room West of your position")
-            print("Brave, Brave, Brave Brave Sir " + self.name + " did stand still.")
-            self.move(self)
-        # checks to see if there is a room 1 space West of adventurer's position, if so, checks to see if room is
-        #         #accessible, if yes, sets room to that location.
+        elif option == 'M':
+            # TODO show visible map
+            pass
 
-        elif move_option == "Joshua":
+        elif option == '@':
+            # TODO show full map
+            pass
+
+        elif option in ('N', 'S', 'E', 'W'):
+            # Try going that direction; move returns False if cannot.
+            if not self.hero.move(option):
+                print("There is no door in that direction.")
+                print(f"And lo, for Brave, Brave, Brave Sir {self.name} did stand still.")
+            print(f"You take a step to the {option}...")
+
+        elif option == 'H':
+            print("You guzzle down the sweet, sweet elixir or life.")
+            self.hero.use_healing_potion()
+
+        elif option == 'V':
+            print("You guzzle down the crystal clear fluid.")
+            self.hero.use_vision_potion()
+
+        elif option == "Joshua":
             print("A strange game. The only winning move is not to play.")
-            self.move(self)
-
-        elif move_option == "Q":
-            print("Brave Sir " + self.name + " ran away. Brave Brave Brave Brave Sir " + self.name + ".")
-            exit()
+            # no-op
 
         else:
-            print("These words that you are using, they do not mean what I think you think they mean. Please try again.")
-            self.move(self)
+            print("These words that you are using... I do not think they mean\n",
+                  "what you think they mean. Please try again.")
+            # no-op
 
-"""Other checks to do: contents of room. If room contains healing, vision, etc, write those strings."""
+    def find_healing_potion(self):
+        print("You find a healing potion. Use this to restore some lost hit-points.")
 
-adventurer = AdventurerInput
-adventurer.start(adventurer)
+    def find_vision_potion(self):
+        print("You find a vision potion. Use this to see surrounding rooms.")
+
+    def fall_into_pit(self):
+        print("You fall into a pit. The fall is merely frightening; the landing hurts.")
+
+
+class MockAdventurer:
+
+    def __init__(self):
+        self.__name = None
+
+    @property
+    def name(self):
+        return self.__name
+
+    def set_name(self, val):
+        self.__name = val
+
+    @staticmethod
+    def move(_):
+        return randrange(4) % 4 == 1
+
+    @staticmethod
+    def use_healing_potion():
+        pass
+
+    @staticmethod
+    def use_vision_potion():
+        pass
+
+
+class MockGame:
+
+    def __init__(self, rounds: int = 4):
+        self.__rounds = rounds
+        self.__hero = MockAdventurer()
+
+    @property
+    def hero(self):
+        return self.__hero
+
+    def quit(self):
+        self.__rounds = 0
+
+    def continues(self):
+        if self.__rounds > 0:
+            self.__rounds -= 1
+        return bool(self.__rounds)
+
+
+if __name__ == "__main__":
+    g_game = MockGame()
+    g_io = AdventurerInput(g_game)
+    g_io.start()
+    while g_game.continues():
+        g_io.prompt()
+
+# END

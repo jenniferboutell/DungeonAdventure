@@ -2,7 +2,7 @@ from typing import Any
 # import random
 
 from room import RoomStyle
-from grid import Grid, GridStr
+from Grid import Grid, GridStr
 
 
 g_dbg_enabled = False

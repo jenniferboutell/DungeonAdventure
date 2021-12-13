@@ -1,4 +1,4 @@
-from room import *
+from Room import *
 
 
 class GridStr:

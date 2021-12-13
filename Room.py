@@ -1,6 +1,6 @@
 import random
 from typing import Optional
-from compass import *
+from Compass import *
 
 
 class RoomStyle:
