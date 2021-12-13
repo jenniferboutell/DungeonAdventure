@@ -8,6 +8,7 @@ class Adventurer:
         self.__healing_potion = 0
         self.__vision_potion = 0
         self.__pillars = []
+        self.__current_location = (0, 0)
 
     def display_inventory(self):
         # Keeps a list of items in inventory
@@ -46,5 +47,21 @@ class Adventurer:
     def pillar_pickup(self, pillar_name):
         self.__pillars.append(pillar_name)
 
+    def adventurer_traversal(self, direction):
 
-    
+        if direction == "north":
+            self.__current_location[1] += 1
+        elif direction == "east":
+            self.__current_location[0] += 1
+        elif direction == "south":
+            self.__current_location[1] -= 1
+        elif direction == "west":
+            self.__current_location[0] -= 1
+
+    # adventurer can see 8 rooms surrounding the current room
+    def vision_rooms(self):
+        pass
+
+    # keeps track of rooms the adventurer passed
+    def rooms_visited(self):
+        pass
