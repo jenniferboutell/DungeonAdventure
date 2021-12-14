@@ -219,10 +219,10 @@ class Room:
     #     self.__doors_mask = # TODO
 
     def has_door(self, direction) -> bool:
-        return bool(self.__doors_mask)
+        return bool(self.__doors_mask & Compass.dir(direction).mask)
 
     def add_door(self, direction) -> None:
-        self.__doors_mask |= Compass.name2mask(direction)
+        self.__doors_mask |= Compass.dir(direction).mask
 
     @property
     def is_entrance(self) -> bool:
@@ -280,7 +280,11 @@ class Room:
 
     @property
     def has_multiple_items(self) -> bool:
-        count = self.healing_potions + self.vision_potions
+        count: int = 0
+        if self.vision_potions > 0:
+            count += 1
+        if self.healing_potions > 0:
+            count += 1
         if self.has_pit:
             count += 1
         if self.pillar is not None:
@@ -288,12 +292,13 @@ class Room:
         return count > 1
 
     def describe(self):
-        return ''.join([f"{k}: {v}\n" for k, v in [
-            'Doors', self.doors_str,
-            'Pit', self.has_pit,
-            'Healing', self.healing_potions,
-            'Vision', self.vision_potions,
-            'Pillar', self.pillar]])
+        return '\n'.join([
+            f"Doors:   {self.doors_str}",
+            f"Pit:     {self.has_pit}",
+            f"Healing: {self.healing_potions}",
+            f"Vision:  {self.vision_potions}",
+            f"Pillar:  {self.pillar}",
+            ])
 
     def __str__(self) -> str:
         return str(RoomStr(self))
@@ -324,7 +329,7 @@ if __name__ == '__main__':
     _r.add_door('N')
     _r.add_door('west')
     _r.healing_potions += 2
-    # print(_r.describe())
+    print(_r.describe())
     print(f"{_r}")
 
 # END
