@@ -6,7 +6,7 @@ Coords = tuple[int, int]
 
 
 class RoomStyle:
-    corner = "+"
+    corner: str = "+"
     wall_n = "-----"
     wall_s = wall_n
     door_n = "--H--"
@@ -15,9 +15,14 @@ class RoomStyle:
     wall_e = wall_w
     door_w = "="
     door_e = door_w
+    coords = False
 
 
-class RoomStyleTom:
+class RoomStyleCoords(RoomStyle):
+    coords = True
+
+
+class RoomStyleTom(RoomStyle):
     corner = "*"
     wall_n = "*****"
     wall_s = wall_n
@@ -74,7 +79,10 @@ class RoomStr:
                 line += style.door_w
             else:
                 line += style.wall_w
-        r = self.room_contents()
+        if style.coords:
+            r = self.room_coords()
+        else:
+            r = self.room_contents()
         line += f" {r:<3} "
         if _room.has_door(East):
             line += style.door_e
@@ -93,7 +101,15 @@ class RoomStr:
         line += style.corner
         self.lines.append(line)
 
-    def room_contents(self):
+    # reporting only coords, rather than contents, is useful for testing
+    def room_coords(self) -> str:
+        _r = self.room
+        if _r.coords is not None:
+            return f"{_r.coord_x},{_r.coord_y}"
+        else:
+            return "#,#"
+
+    def room_contents(self) -> str:
         _r = self.room
         if _r.has_multiple_items:
             return 'M'
@@ -303,33 +319,31 @@ class Room:
     def __str__(self) -> str:
         return str(RoomStr(self))
 
-    # reporting only coords, rather than contents, is useful for testing
-    def mock_str(self) -> str:
-        if self.grid is not None:
-            return f"{self.coord_x},{self.coord_y}"
-        else:
-            return "?"
-
     def __repr__(self) -> str:
-        return self.mock_str()
+        return RoomStr(self).room_coords()
 
 
 if __name__ == '__main__':
-    print(f"Greetings from Room!")
+    print(f"Greetings from Room!\n")
 
     print(f"standalone room, empty and sealed:")
-    _r = Room()
-    print(f"{_r}")
+    g_r = Room()
+    print(f"{g_r}")
+    print(f"...with coords-style contents, but hey no coords:")
+    print(f"{RoomStr(g_r, style=RoomStyleCoords)}")
 
     print(f"grid room, empty and sealed:")
-    _r = Room(coords=(2, 3))
-    print(f"{_r}")
+    g_r = Room(coords=(2, 3))
+    print(f"{g_r}")
+    print(f"...with coords-style contents:")
+    print(f"{RoomStr(g_r, style=RoomStyleCoords)}")
 
     print(f"grid room, with doors and a potion:")
-    _r.add_door('N')
-    _r.add_door('west')
-    _r.healing_potions += 2
-    print(_r.describe())
-    print(f"{_r}")
+    g_r.add_door('N')
+    g_r.add_door('west')
+    g_r.healing_potions += 2
+    print(f"{g_r}")
+    print(f"description thereof:")
+    print(g_r.describe())
 
 # END

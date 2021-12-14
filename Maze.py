@@ -1,7 +1,7 @@
 from typing import Any
 # import random
 
-from room import RoomStyle
+from Room import RoomStyle
 from Grid import Grid, GridStr
 
 
@@ -124,31 +124,31 @@ class Maze(Grid):
 
 
 if __name__ == '__main__':
-    print("Greetings from Maze!")
+    print("Greetings from Maze!\n")
 
     # Default 4x4 grid, no doors yet
-    print(f"\nDefault maze...")
     m = Maze()
+    print(f"default maze is {m.width}x{m.height}:")
     print(m)
 
-    # Custom maze, only measure dimensions
-    print(f"\nCustom 2x2, measure only...")
+    # Measure canned
+    print(f"canned dungeon:")
     g_map_str = """
-# This is my 2x2 dungeon
-+-----+-----+
-| E   =     |
-+-----+--H--+
-|     | O   |
-+-----+-----+
+# This is my dungeon
++-----+-----+-----+
+| E   |     =     |
++--H--+--H--+--H--+
+|     =     | O   |
++-----+-----+-----+
 """.lstrip()
     print(g_map_str)
     g_width, g_height = Maze.parse_map(g_map_str)
-    print(f"maze width={g_width} height={g_height}")
+    print("measure-only estimates as {g_width}x{g_height}\n")
 
     # Full init from canned maze
-    print(f"\nCustom 3x2, full load...")
+    print(f"another canned dungeon:")
     g_map_str = """
-# This is my 3x2 dungeon
+# This is my other dungeon
 +-----+-----+-----+
 | E   |     = O   |
 +--H--+--H--+-----+
@@ -156,10 +156,10 @@ if __name__ == '__main__':
 +-----+-----+-----+
 """.lstrip()
     print(g_map_str)
+    print(f"...now do full load...")
     m = Maze(map_str=g_map_str)
-    print(f"maze width={m.width} height={m.height}")
-    print(f"maze (out)...\n{m}")
-    ms = GridStr(m)
-    print(f"maze (formatted)...\n{ms}")
+    print(f"...reports dimensions {m.width}x{m.height}")
+    print(f"...and re-render:")
+    print(f"{m}")
 
 # END

@@ -1,9 +1,20 @@
 from Room import *
 
+Coords = tuple[int, int]
+
 
 class GridStr:
+    __style_default = RoomStyle
 
-    def __init__(self, grid, style=RoomStyle):
+    @classmethod
+    def set_style_default(cls, style):
+        cls.__style_default = style
+
+    def __init__(self, grid, style=None):
+        self.style = self.__style_default
+        if style is not None:
+            self.style = style
+        style = self.style  # just shorter to type
         self.lines = []
         for y in range(grid.height):
             # When starting new row, initialize each of row_lines to "".
@@ -27,10 +38,10 @@ class GridStr:
 
 class Grid:
 
-    def __init__(self, width=2, height=2, from_grid=None, from_x=None, from_y=None):
-        if from_grid is not None:
-            if not isinstance(from_x, int) or not isinstance(from_y, int):
-                raise TypeError(f"from_x and from_y must be type int")
+    def __init__(self, width=2, height=2, from_grid=None, from_coords: Coords = None):
+        if from_coords is not None:
+            if not isinstance(from_coords[0], int) or not isinstance(from_coords[1], int):
+                raise TypeError(f"from_coords must be tuple of int pair")
         self.__width = width
         self.__height = height
         self.__rooms = []
@@ -39,10 +50,12 @@ class Grid:
                 row = []
                 self.__rooms.append(row)
                 for x in range(self.width):
-                    r = Room(self, x, y)
+                    r = Room(grid=self, coords=(x, y))
                     row.append(r)
             else:
-                row = from_grid.rooms[from_y+y][from_x:from_x+width]
+                from_x = from_coords[0]
+                from_y = from_coords[1]
+                row = from_grid.rooms[from_y + y][from_x:from_x + width]
                 self.__rooms.append(row)
 
     @property
@@ -57,27 +70,36 @@ class Grid:
     def rooms(self) -> list:
         return self.__rooms
 
-    def room(self, x, y) -> Room:
+    def room(self, x: int, y: int) -> Room:
+        # If coords are out-of-bounds, just let resulting IndexError bubble up
         return self.__rooms[y][x]
 
     def __str__(self) -> str:
-        return "".join([f"{row}\n" for row in self.__rooms])
+        return str(GridStr(self))
 
     def __repr__(self) -> str:
-        return self.__str__()
+        return "".join([f"{row}\n" for row in self.__rooms])
 
 
 if __name__ == '__main__':
-    print(f"Greetings from Grid!")
+    print(f"Greetings from Grid!\n")
 
-    print(f"\nDefault 2x2 grid...")
     g = Grid()
-    print(f"width={g.width} height={g.height}\n{g}")
+    print(f"default grid is {g.width}x{g.height}:")
+    print(f"{g}")
 
-    print(f"\nParent 4x5 grid, and 2x3 subgrid from (2,1)")
-    g1 = Grid(4, 5)
-    print(f"g1...\n{g1}")
-    g2 = Grid(2, 3, from_grid=g1, from_x=2, from_y=1)
-    print(f"g2...\n{g2}")
+    GridStr.set_style_default(RoomStyleCoords)
+    g_w = 4
+    g_h = 5
+    print(f"parent {g_w}x{g_h} grid:")
+    g1 = Grid(g_w, g_h)
+    print(f"{g1}")
+    g_w = 2
+    g_h = 3
+    g_x = 2
+    g_y = 1
+    print(f"...and {g_w}x{g_h} subgrid with origin at parent coords ({g_x},{g_y})")
+    g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(g_x, g_y))
+    print(f"{g2}")
 
 # END
