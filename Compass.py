@@ -4,14 +4,29 @@ Coords = tuple[int, int]
 
 
 class CompassDirection:
-    def __init__(self, name: str, mask: int, vector: Coords):
-        self.__name: str = name
+    def __init__(self, name: str, mask: int, vector: Coords, abbr: str = None):
+        self.__name: str = name.capitalize()
+        self.__abbr: str = self.name[0]
+        if abbr is not None:
+            self.__abbr = abbr.upper()
         self.__mask: int = mask
         self.__vector: Coords = vector
+
+    def diag(self, dir2):
+        if self.mask & ~self.mask != 0 or dir2.mask & ~dir2.mask != 0:
+            raise ValueError(f"can only create diagonal direction from two perpendicular directions")
+        return CompassDirection(name=self.name + dir2.name,
+                                abbr=self.abbr + dir2.abbr,
+                                mask=self.mask | dir2.mask,
+                                vector=(self.vector[0] + dir2.vector[0], self.vector[1] + dir2.vector[1]))
 
     @property
     def name(self) -> str:
         return self.__name
+
+    @property
+    def abbr(self) -> str:
+        return self.__abbr
 
     @property
     def mask(self) -> int:
@@ -29,16 +44,24 @@ class Compass:
     east = CompassDirection(name='East', mask=0b0001, vector=(+1, 0))
     dirs: list = [north, south, west, east]
 
+    northwest = north.diag(west)
+    southwest = south.diag(west)
+    northeast = north.diag(east)
+    southeast = south.diag(east)
+    diags: list = [northwest, southwest, northeast, southeast]
+
     # Map from string representations of each direction to its instance.
     # Lookups are case-insensitive and works for full name or first letter.
     # So for example, these all work: "North", "NORTH", "north", "N", "n".
     # This might be better implemented with collections.Mapping subclass;
     # but dict with overloaded keys is quick-n-easy.
     names: dict = {}
-    # names.update([(_d.name, _d) for _d in dirs])
-    # names.update([(_d.name[0], _d) for _d in dirs])
     names.update([(_d.name.lower(), _d) for _d in dirs])
     names.update([(_d.name.lower()[0], _d) for _d in dirs])
+    # If lookup always lower-cases target first -- which dir() does --
+    # then don't need to add dict keys for any other case combinations.
+    # names.update([(_d.name, _d) for _d in dirs])
+    # names.update([(_d.name[0], _d) for _d in dirs])
     # names.update([(_d.name.upper(), _d) for _d in dirs])
 
     # Map from bitmask representation of each direction to its instance.
@@ -103,7 +126,13 @@ East = Compass.east
 
 if __name__ == '__main__':
     print(f"Greetings from Compass!")
+
+    print(f"\nPrimary directions:")
     for _d in Compass.dirs:
-        print(f"{_d.name:6} mask:{_d.mask}/{_d.mask:04b} vector:{_d.vector}")
+        print(f"name:{_d.name:6} abbr:{_d.abbr} mask:{_d.mask}/{_d.mask:04b} vector:{_d.vector}")
+
+    print(f"\nDiagonal directions:")
+    for _d in Compass.diags:
+        print(f"name:{_d.name} abbr:{_d.abbr} mask:{_d.mask}/{_d.mask:04b} vector:{_d.vector}")
 
 # END
