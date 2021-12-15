@@ -1,5 +1,4 @@
 import random
-from typing import Optional
 from Compass import *
 
 Coords = tuple[int, int]
@@ -111,7 +110,7 @@ class RoomStr:
 
     def room_contents(self) -> str:
         _r = self.room
-        if _r.has_multiple_items:
+        if _r.has_mixed_contents:
             return 'M'
         elif _r.is_entrance:
             return 'E'
@@ -148,7 +147,7 @@ class Room:
                  is_entrance: bool = False,
                  is_exit: bool = False,
                  doors_mask: int = 0,
-                 doors_list: list = [],
+                 doors_list: list = None,
                  has_pit: bool = False,
                  healing_potions: int = 0,
                  vision_potions: int = 0,
@@ -165,8 +164,7 @@ class Room:
         if doors_mask and doors_list:
             raise ValueError("init Room with doors_mask or doors_list, not both")
         elif doors_list and not doors_mask:
-            # self.__doors_mask =  # TODO
-            pass
+            self.__doors_mask = Compass.dirs2mask(doors_list)
         else:
             self.__doors_mask = doors_mask
 
@@ -219,6 +217,7 @@ class Room:
         x = self.coord_x + _dir.vect_x
         y = self.coord_y + _dir.vect_y
         if not 0 <= x < _grid.width or not 0 <= y < _grid.height:
+            print(f"neighbor: room({self.coords}) {_dir.name} -! ({x},{y}) outside grid")
             return None
         print(f"neighbor: room({self.coords}) {_dir.name} -> ({x},{y})")
         return _grid.room(x, y)
@@ -311,7 +310,7 @@ class Room:
         # self.pillar = "I"  # FIXME Dungeon should place Pillars, not Room
 
     @property
-    def has_multiple_items(self) -> bool:
+    def has_mixed_contents(self) -> bool:
         count: int = 0
         if self.vision_potions > 0:
             count += 1
@@ -325,12 +324,13 @@ class Room:
 
     def describe(self):
         return '\n'.join([
+            f"Coords:  {self.coords}",
             f"Doors:   {self.doors_str}",
             f"Pit:     {self.has_pit}",
             f"Healing: {self.healing_potions}",
             f"Vision:  {self.vision_potions}",
             f"Pillar:  {self.pillar}",
-            ])
+        ])
 
     def __str__(self) -> str:
         return str(RoomStr(self))

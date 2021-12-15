@@ -46,8 +46,8 @@ class CompassDirection:
 
 
 class Compass:
-    north = CompassDirection(name='North', mask=0b1000, vector=(0, +1))
-    south = CompassDirection(name='South', mask=0b0100, vector=(0, -1))
+    north = CompassDirection(name='North', mask=0b1000, vector=(0, -1))
+    south = CompassDirection(name='South', mask=0b0100, vector=(0, +1))
     west = CompassDirection(name='West', mask=0b0010, vector=(-1, 0))
     east = CompassDirection(name='East', mask=0b0001, vector=(+1, 0))
     dirs: list = [north, south, west, east]
@@ -112,6 +112,17 @@ class Compass:
         if isinstance(val, str):
             return Compass.name2dir(val)
         raise TypeError(f"Compass.dir() does not accept that type")
+
+    @staticmethod
+    def dirs2mask(dirs: list) -> int:
+        """
+        :param dirs: List of zero or more CompassDirection instances or string names
+        :return: Integer mask representing zero to multiple directions
+        """
+        out = 0
+        for _d in dirs:
+            out |= Compass.dir(_d).mask
+        return out
 
     @staticmethod
     def mask2dirs(mask: int) -> list:

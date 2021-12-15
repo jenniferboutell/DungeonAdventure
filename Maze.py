@@ -6,7 +6,7 @@ from Room import RoomStyle
 from Grid import Grid
 
 
-g_dbg_enabled = True
+g_dbg_enabled = False
 
 
 def dbg_print(*args, **kwargs):
