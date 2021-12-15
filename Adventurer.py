@@ -11,6 +11,7 @@ class Adventurer:
         self.__healing_potions: int = 0
         self.__vision_potions: int = 0
         self.__pillars: set = set()
+        self.__coords = (0,0)
 
     @property
     def name(self):
@@ -85,10 +86,14 @@ class Adventurer:
         """ Try to step in a a direction.
         Return True if successful, False if cannot.
         """
-        North = (0,1)
-        East = (1,0)
-        South = (0,-1)
-        West = (-1,0)
+        if direction == "North":
+            self.__coords[0] -= 1
+        elif direction == "East":
+            self.__coords[1] -= 1
+        elif direction == "South":
+            self.__coords[0] += 1
+        elif direction == "West":
+            self.__coords[1] += 1
 
         # TODO traverse to adjacent room hand off to Game for this.
         # return self.__game.traverse(direction)
