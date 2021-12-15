@@ -56,6 +56,10 @@ class Adventurer:
         """ Try to step in a a direction.
         Return True if successful, False if cannot.
         """
+        North = (0,1)
+        East = (1,0)
+        South = (0,-1)
+        West = (-1,0)
         # TODO traverse to adjacent room hand off to Game for this.
         # return self.__game.traverse(direction)
         return True
