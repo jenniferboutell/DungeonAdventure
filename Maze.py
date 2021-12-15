@@ -158,10 +158,23 @@ class Maze(Grid):
                             if r2:
                                 r2.add_door(South)
                 else:
-                    # TODO interpret contents
-                    # contents = line[char_num:char_num+wall_len]
-                    dbg_parse(f"contents")
-                    pass
+                    contents = line[char_num:char_num+wall_len].strip()
+                    dbg_parse(f"contents: {contents}")
+                    for c in contents:
+                        if c == 'i':
+                            r.is_entrance = True
+                        elif c == 'O':
+                            r.is_exit = True
+                        elif c == 'X':
+                            r.has_pit = True
+                        elif c == 'H':
+                            r.healing_potions += 1
+                        elif c == 'V':
+                            r.vision_potions += 1
+                        elif c in ('A', 'E', 'I', 'P'):
+                            r.pillar = c
+                        else:
+                            raise ValueError(f"{c} in room {r.coords} not recognized")
                 char_num += wall_len
 
                 if not east_edge:
@@ -204,7 +217,7 @@ if __name__ == '__main__':
     g_map_str = """
 # This is my dungeon
 +-----+-----+-----+
-| E   |     =     |
+| i   |     =     |
 +--H--+--H--+--H--+
 |     =     | O   |
 +-----+-----+-----+
@@ -218,9 +231,9 @@ if __name__ == '__main__':
     g_map_str = """
 # This is my other dungeon
 +-----+-----+-----+
-| E   |     = O   |
+| i   |     = O   |
 +--H--+--H--+-----+
-|     =     =     |
+| P   = XV  = HH  |
 +-----+-----+-----+
 """.lstrip()
     print(g_map_str)

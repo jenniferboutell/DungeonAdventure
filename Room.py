@@ -113,7 +113,7 @@ class RoomStr:
         if _r.has_mixed_contents:
             return 'M'
         elif _r.is_entrance:
-            return 'E'
+            return 'i'
         elif _r.is_exit:
             return 'O'
         elif _r.has_pit:
@@ -122,6 +122,8 @@ class RoomStr:
             return 'V'
         elif _r.healing_potions:
             return 'H'
+        elif _r.pillar:
+            return _r.pillar
         else:
             return ' '
 
