@@ -209,6 +209,20 @@ class Room:
             raise ValueError(f"expected coords within grid bounds ({g.width}x{g.height})")
         self.__coords = coords
 
+    def neighbor(self, direction):
+        _dir = Compass.dir(direction)
+        if _dir is None:
+            raise ValueError(f"neighbor got invalid direction {direction}")
+        _grid = self.grid
+        if _grid is None:
+            return None
+        x = self.coord_x + _dir.vect_x
+        y = self.coord_y + _dir.vect_y
+        if not 0 <= x < _grid.width or not 0 <= y < _grid.height:
+            return None
+        print(f"neighbor: room({self.coords}) {_dir.name} -> ({x},{y})")
+        return _grid.room(x, y)
+
     @property
     def doors_mask(self) -> int:
         return self.__doors_mask
@@ -238,7 +252,9 @@ class Room:
         return bool(self.__doors_mask & Compass.dir(direction).mask)
 
     def add_door(self, direction) -> None:
-        self.__doors_mask |= Compass.dir(direction).mask
+        _d = Compass.dir(direction)
+        print(f"add_door: room({self.coords}) {_d.name}")
+        self.__doors_mask |= _d.mask
 
     @property
     def is_entrance(self) -> bool:

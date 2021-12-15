@@ -36,6 +36,14 @@ class CompassDirection:
     def vector(self) -> Coords:
         return self.__vector
 
+    @property
+    def vect_x(self) -> int:
+        return self.__vector[0]
+
+    @property
+    def vect_y(self) -> int:
+        return self.__vector[1]
+
 
 class Compass:
     north = CompassDirection(name='North', mask=0b1000, vector=(0, +1))

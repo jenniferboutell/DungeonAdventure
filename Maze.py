@@ -1,11 +1,12 @@
 from typing import Any
 # import random
 
+from Compass import North, South, East, West
 from Room import RoomStyle
-from Grid import Grid, GridStr
+from Grid import Grid
 
 
-g_dbg_enabled = False
+g_dbg_enabled = True
 
 
 def dbg_print(*args, **kwargs):
@@ -19,30 +20,47 @@ class Maze(Grid):
         if map_str is not None:
             width, height = Maze.parse_map(map_str=map_str)
         super().__init__(width=width, height=height)
+        dbg_print(f"initializing {self.width}x{self.height} grid")
+        if g_dbg_enabled:
+            print(f"{self}")
         if map_str is not None:
-            Maze.parse_map(map_str=map_str, grid=self)
+            self.load_map(map_str=map_str)
         # Initialization of other fields deferred to separate methods.
         self.__path: list[Any] = []
+
+    def load_map(self, **kwargs):
+        Maze.parse_map(grid=self, **kwargs)
 
     @staticmethod
     def parse_map(map_str: str = None, grid=None, style=RoomStyle):
         wall_len: int = len(style.wall_n)
         line_len: int = 0
+
         in_grid: bool = False
-        want_lat: bool = True
-        num_cols: int = 0
+        south_edge: bool = False
+
         num_rows: int = 0
+        # num_cols: int = 0
         grid_row: int = 0
+        want_lat: bool = True
+
         line_num: int = 0  # 1-indexed, unlike everything else
+        char_num = 0
+
+        def dbg_parse(*args, **kwargs):
+            dbg_print(f"L{line_num}C{char_num}: ", *args, **kwargs)
+
         lines = map_str.splitlines()
         for line in lines:
             line_num += 1
             line = line.rstrip()
-            dbg_print(f"L{line_num}: '{line}'")
+            dbg_parse(f"line '{line}'")
 
             # skip header comment/whitespace lines
             if not in_grid and (len(line) == 0 or line.startswith('#')):
                 continue
+
+            # one-time work upon first entering grid
             if not in_grid:
                 in_grid = True
 
@@ -56,41 +74,69 @@ class Maze(Grid):
                     if (len(lines)-line_num) % 2 != 0:
                         raise ValueError(f"expected line count 2*N+1, got {len(lines)-line_num}")
                     num_rows = (len(lines)-line_num)//2
-                    dbg_print(f"measured grid dims={num_cols}x{num_rows}")
+                    dbg_parse(f"estimated grid dims={num_cols}x{num_rows}")
                     return num_cols, num_rows
+                    # All done! Only estimating dimensions.
+                    # TODO could optionally do fuller validation that grid looks legit
+
                 else:
                     num_cols = grid.width
                     num_rows = grid.height
                     line_len = num_cols * (wall_len + 1) + 1
-                    dbg_print(f"estimated grid dims={num_cols}x{num_rows} line_len={line_len}")
+                    dbg_parse(f"grid dims={num_cols}x{num_rows} line_len={line_len}")
 
-            dbg_print(f"L{line_num}: length={len(line)}")
+            dbg_parse(f"line len {len(line)}")
             # sanity check, for errant line unexpectedly longer than first line
             if len(line) != line_len:
                 raise ValueError(f"L{line_num}: does not match expected len_len {line_len}")
-            dbg_print(f"L{line_num}: want_lat={want_lat}")
+            dbg_parse(f"want_lat={want_lat}")
 
             # walk the line
             char_num = 0
             grid_col: int = 0
+            east_edge: bool = False
+            r = None  # current room
             while char_num < len(line):
+                dbg_parse(f"room ({grid_col},{grid_row})")
 
-                # on a vertical wall, either west side of room OR far-east wall of grid
-                dbg_print(f"L{line_num}C{char_num}: grid_col={grid_col}")
+                # last char in line
+                if char_num + 1 >= len(line):
+                    dbg_parse(f"last char in line")
+                    east_edge = True
+
+                # on or aligned with a vertical wall, which is either:
+                # west side of room contents that follows
+                # OR east side of room contents just parsed
+                dbg_parse(f"grid col {grid_col}")
                 c = line[char_num]
                 if want_lat:
                     if c != style.corner:
                         raise ValueError(f"L{line_num}C{char_num}: expected corner '{style.corner}', got '{c}'")
-                    dbg_print(f"L{line_num}C{char_num}: corner")
+                    dbg_parse(f"corner")
                 else:
                     if c != style.wall_w and c != style.door_w:
                         raise ValueError(f"L{line_num}C{char_num}: expected wall '{style.wall_w}'" +
                                          f" or door '{style.door_w}', got '{c}'")
-                    dbg_print(f"L{line_num}C{char_num}: wall/door")
-                # if last char in line, then completing room from previous round
-                if char_num == len(line) - 1:
-                    dbg_print(f"L{line_num}C{char_num}: last char in line")
-                    break
+                    dbg_parse(f"East-West room side")
+                if east_edge:
+                    if not want_lat and r:
+                        # completing room from previous round
+                        if c == style.door_e:
+                            r.add_door(East)
+                        # r = None  # reset for next row
+                    break  # from "walk the line" loop
+
+                dbg_parse(f"get room...")
+                r = grid.room(grid_col, grid_row)
+
+                if not want_lat:
+                    if r and c == style.door_w:
+                        r.add_door(West)
+                        # if room to west, add east door to it
+                        r2 = r.neighbor(West)
+                        if r2:
+                            r2.add_door(East)
+
                 char_num += 1
 
                 # between vertical walls
@@ -100,27 +146,49 @@ class Maze(Grid):
                     if wall != style.wall_n and wall != style.door_n:
                         raise ValueError(f"L{line_num}C{char_num}: expected north wall '{style.wall_n}'" +
                                          f" or door '{style.door_n}', but got '{wall}'")
-                    dbg_print(f"L{line_num}C{char_num}: wall/door")
+                    dbg_parse(f"North-South room side")
+                    if r:
+                        if south_edge:
+                            if wall == style.door_s:
+                                r.add_door(South)
+                        elif wall == style.door_n:
+                            r.add_door(North)
+                            # if there is a room to north, add south door to it
+                            r2 = r.neighbor(North)
+                            if r2:
+                                r2.add_door(South)
                 else:
-                    # TODO interpret contents?
+                    # TODO interpret contents
                     # contents = line[char_num:char_num+wall_len]
-                    dbg_print(f"L{line_num}C{char_num}: contents")
+                    dbg_parse(f"contents")
                     pass
                 char_num += wall_len
-                grid_col += 1
-                dbg_print(f"L{line_num}C{char_num}: next grid_col={grid_col} if any")
 
-            dbg_print(f"prep for next line...")
+                if not east_edge:
+                    grid_col += 1
+                    dbg_parse(f"next up: grid_col {grid_col} west edge")
+                else:
+                    dbg_parse(f"next up: grid_row {grid_row} east edge")
+
+            dbg_parse(f"prep for next line...")
 
             # if last line, then completing room on bottom row
             if line_num == len(lines):
-                dbg_print(f"last line, assume solid (no doors) wall")
+                dbg_parse(f"final wall completed")
                 break
 
-            # increment in preparation for next row
-            grid_row += 1
+            # prep for next line
+            # if got content line, increment in row_num for next row...
+            # unless on last row, in which case next line is final line,
+            # handled as south wall of final row and south edge of grid.
+            if not want_lat:
+                if grid_row + 1 < num_rows:
+                    grid_row += 1
+                else:
+                    south_edge = True
+                    dbg_parse(f"next up: row {grid_row} south edge")
             want_lat = not want_lat
-            dbg_print(f"grid_row={grid_row} want_lat={want_lat}")
+            dbg_parse(f"next up: row {grid_row} want_lat={want_lat}")
 
 
 if __name__ == '__main__':
@@ -142,8 +210,8 @@ if __name__ == '__main__':
 +-----+-----+-----+
 """.lstrip()
     print(g_map_str)
-    g_width, g_height = Maze.parse_map(g_map_str)
-    print("measure-only estimates as {g_width}x{g_height}\n")
+    g_width, g_height = Maze.parse_map(map_str=g_map_str)
+    print(f"measure-only estimates as {g_width}x{g_height}\n")
 
     # Full init from canned maze
     print(f"another canned dungeon:")
