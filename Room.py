@@ -210,6 +210,13 @@ class Room:
         self.__coords = coords
 
     def neighbor(self, direction):
+        """ Get neighboring room in specified direction from self room.
+        :param direction: Direction of neighboring room wrt self room.
+        :return: Neighboring room, if there is one; otherwise None.
+
+        Exception only raised for direction; attempting to fetch a hypothetical
+        neighbor that would lie outside the grid returns None.
+        """
         _dir = Compass.dir(direction)
         if _dir is None:
             raise ValueError(f"neighbor got invalid direction {direction}")
@@ -219,9 +226,9 @@ class Room:
         x = self.coord_x + _dir.vect_x
         y = self.coord_y + _dir.vect_y
         if not 0 <= x < _grid.width or not 0 <= y < _grid.height:
-            print(f"neighbor: room({self.coords}) {_dir.name} -! ({x},{y}) outside grid")
+            # print(f"neighbor: room({self.coords}) {_dir.name} -! ({x},{y}) outside grid")
             return None
-        print(f"neighbor: room({self.coords}) {_dir.name} -> ({x},{y})")
+        # print(f"neighbor: room({self.coords}) {_dir.name} -> ({x},{y})")
         return _grid.room(x, y)
 
     @property
@@ -253,9 +260,29 @@ class Room:
         return bool(self.__doors_mask & Compass.dir(direction).mask)
 
     def add_door(self, direction) -> None:
+        """ Add a door in specified direction from self room, and likewise
+        from corresponding neighboring room, if one exists in that direction.
+
+        Since doors are represented within rooms via bitmask, rather than
+        a ref to neighboring room; thus when a door connects two rooms,
+        each room must have that door marked in its respective bitmask.
+
+        Allowed to add a door that leads outside the grid, i.e. no neighboring
+        room exists in that direction; though depending upon the context,
+        perhaps not what you want.
+
+        :param direction: Outward direction from room
+        :return None
+        :exception ValueError if direction is not recognized
+        """
         _d = Compass.dir(direction)
-        print(f"add_door: room({self.coords}) {_d.name}")
+        print(f"add_door: > room({self.coords}) {_d.name}")
         self.__doors_mask |= _d.mask
+        _r = self.neighbor(direction)
+        if _r is not None:
+            _d = _d.opposite
+            print(f"add_door: < room({_r.coords}) {_d.name}")
+            _r.doors_mask |= _d.mask
 
     @property
     def is_entrance(self) -> bool:

@@ -123,7 +123,6 @@ class Maze(Grid):
                         # completing room from previous round
                         if c == style.door_e:
                             r.add_door(East)
-                        # r = None  # reset for next row
                     break  # from "walk the line" loop
 
                 dbg_parse(f"get room...")
@@ -132,10 +131,10 @@ class Maze(Grid):
                 if not want_lat:
                     if r and c == style.door_w:
                         r.add_door(West)
-                        # if room to west, add east door to it
-                        r2 = r.neighbor(West)
-                        if r2:
-                            r2.add_door(East)
+                        # if room to west, add_door() also adds east door to it
+                        # r2 = r.neighbor(West)
+                        # if r2:
+                        #     r2.add_door(East)
 
                 char_num += 1
 
@@ -153,10 +152,10 @@ class Maze(Grid):
                                 r.add_door(South)
                         elif wall == style.door_n:
                             r.add_door(North)
-                            # if there is a room to north, add south door to it
-                            r2 = r.neighbor(North)
-                            if r2:
-                                r2.add_door(South)
+                            # if there room to north, add_door() also adds south door to it
+                            # r2 = r.neighbor(North)
+                            # if r2:
+                            #     r2.add_door(South)
                 else:
                     contents = line[char_num:char_num+wall_len].strip()
                     dbg_parse(f"contents: {contents}")

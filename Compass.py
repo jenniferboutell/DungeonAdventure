@@ -1,6 +1,8 @@
-from typing import Optional, Union
+from typing import Optional, Union, ForwardRef
 
 Coords = tuple[int, int]
+DirObj = ForwardRef('CompassDirection')
+DirAny = Union[DirObj, str, int]
 
 
 class CompassDirection:
@@ -44,6 +46,10 @@ class CompassDirection:
     def vect_y(self) -> int:
         return self.__vector[1]
 
+    @property
+    def opposite(self) -> DirObj:
+        return Compass.opposites.get(self)
+
 
 class Compass:
     north = CompassDirection(name='North', mask=0b1000, vector=(0, -1))
@@ -57,6 +63,19 @@ class Compass:
     northeast = north.diag(east)
     southeast = south.diag(east)
     diags: list = [northwest, southwest, northeast, southeast]
+
+    # Map each direction to its opposite.
+    # Could be done programmatically, but whatever. Eight lines.
+    opposites = {
+        north: south,
+        south: north,
+        east: west,
+        west: east,
+        northeast: southwest,
+        southwest: northeast,
+        northwest: southeast,
+        southeast: northwest,
+    }
 
     # Map from string representations of each direction to its instance.
     # Lookups are case-insensitive and works for full name or first letter.
@@ -80,6 +99,10 @@ class Compass:
         masks[_d.mask] = _d
 
     @staticmethod
+    def opposite(dir: DirAny) -> Optional[CompassDirection]:
+        return Compass.opposites.get(Compass.dir(dir))
+
+    @staticmethod
     def name2dir(name: str) -> Optional[CompassDirection]:
         """ Lookup direction by name (string).
         :param name: String corresponding to one direction.
@@ -100,7 +123,7 @@ class Compass:
         return None
 
     @staticmethod
-    def dir(val: Union[CompassDirection, str, int]) -> Optional[CompassDirection]:
+    def dir(val: DirAny) -> Optional[CompassDirection]:
         """ Lookup direction by bitmask (integer).
         :param val: Value corresponding to one direction.
         :return: CompassDirection instance, or None.
@@ -114,7 +137,7 @@ class Compass:
         raise TypeError(f"Compass.dir() does not accept that type")
 
     @staticmethod
-    def dirs2mask(dirs: list) -> int:
+    def dirs2mask(dirs: list[DirAny]) -> int:
         """
         :param dirs: List of zero or more CompassDirection instances or string names
         :return: Integer mask representing zero to multiple directions
@@ -125,7 +148,7 @@ class Compass:
         return out
 
     @staticmethod
-    def mask2dirs(mask: int) -> list:
+    def mask2dirs(mask: int) -> list[CompassDirection]:
         """
         :param mask: Integer mask representing zero to multiple directions.
         :return: List of CompassDirection instances
@@ -146,12 +169,16 @@ East = Compass.east
 if __name__ == '__main__':
     print(f"Greetings from Compass!")
 
-    print(f"\nPrimary directions:")
-    for _d in Compass.dirs:
-        print(f"name:{_d.name:6} abbr:{_d.abbr} mask:{_d.mask}/{_d.mask:04b} vector:{_d.vector}")
+    def show_dirs(dir_list):
+        for _d in dir_list:
+            _mask = f"{_d.mask:04b}({_d.mask})"  # max width 8
+            _vec = str(_d.vector)  # max width 8
+            _opp = _d.opposite.name
+            print(f"name:{_d.name:6} abbr:{_d.abbr} mask:{_mask:8} vector:{_vec:8} opposite:{_opp}")
 
+    print(f"\nPrimary directions:")
+    show_dirs(Compass.dirs)
     print(f"\nDiagonal directions:")
-    for _d in Compass.diags:
-        print(f"name:{_d.name} abbr:{_d.abbr} mask:{_d.mask}/{_d.mask:04b} vector:{_d.vector}")
+    show_dirs(Compass.diags)
 
 # END
