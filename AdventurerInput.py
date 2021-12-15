@@ -1,14 +1,18 @@
 from random import randrange
 
 # from DungeonAdventure import DungeonAdventure
-# from Adventurer import Adventurer
-# from Room import Room
+from Adventurer import Adventurer
+from Compass import *
+from Room import Room
 
 
 class AdventurerInput:
 
     def __init__(self, game):
         self.__game = game
+        self.__hero = Adventurer(game)
+        self.__room = Room()
+
 
     @property
     def game(self):
@@ -71,7 +75,7 @@ class AdventurerInput:
             # TODO show full map
             pass
 
-        elif option in ('N', 'S', 'E', 'W'):
+        elif option in ('put directions back here when real traversal ready'):
             # Try going that direction; move returns False if cannot.
             if not self.hero.move(option):
                 print("There is no door in that direction.")
@@ -80,16 +84,31 @@ class AdventurerInput:
 
         elif option == 'H':
             print("You guzzle down the sweet, sweet elixir or life.")
-            self.hero.use_healing_potion()
+            self.__hero.use_healing_potion()
 
         elif option == 'V':
             print("You guzzle down the crystal clear fluid.")
-            self.hero.use_vision_potion()
+            self.__hero.use_vision_potion()
 
         elif option == "Joshua":
             print("A strange game. The only winning move is not to play.")
             # no-op
 
+        elif option in ('N', 'S', 'E', 'W'):
+            print(f"You take a step to the {option}...")
+            nextroom = self.__room.neighbor(option)
+            if nextroom is None:
+                print("There is no room in this direction.")
+                return
+            self.__room = nextroom
+            self.__room.set_room()
+            print(self.__room)
+            if self.__room.healing_potions:
+                self.find_healing_potion()
+            if self.__room.vision_potions:
+                self.find_vision_potion()
+            if self.__room.has_pit:
+                self.fall_into_pit()
         else:
             print("These words that you are using... I do not think they mean\n",
                   "what you think they mean. Please try again.")
@@ -151,6 +170,7 @@ class MockGame:
 
     def play(self):
         self.__io.start()
+
         while self.continues():
             self.__io.prompt()
         self.__io.finish()

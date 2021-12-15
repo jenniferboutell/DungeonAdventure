@@ -1,4 +1,5 @@
-# from Room import Room
+from Room import Room
+from DungeonAdventure import *
 
 
 class Adventurer:
@@ -10,6 +11,7 @@ class Adventurer:
         self.__healing_potions: int = 0
         self.__vision_potions: int = 0
         self.__pillars: set = set()
+
 
     def display_inventory(self):
         # Keeps a list of items in inventory
@@ -35,10 +37,14 @@ class Adventurer:
         self.__healing_potions += 1
 
     def use_healing_potion(self, hit_points: int = 15):
+        if self.__healing_potions == 0:
+            print("You have bravely neglected to notice that you do not have any healing potions.")
+            return
         self.__healing_potions -= 1
         self.__hit_points += hit_points
         if self.__hit_points > 100:
             self.__hit_points = 100
+        print("You have " + str(self.__hit_points) + " hit points now.")
         # FIXME cannot exceed some max threshold
 
     def gain_vision_potion(self):
@@ -56,6 +62,7 @@ class Adventurer:
         """ Try to step in a a direction.
         Return True if successful, False if cannot.
         """
+
         # TODO traverse to adjacent room hand off to Game for this.
         # return self.__game.traverse(direction)
         return True
