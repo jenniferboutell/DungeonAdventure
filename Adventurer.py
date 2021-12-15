@@ -1,5 +1,5 @@
 from Room import Room
-from DungeonAdventure import *
+#from DungeonAdventure import *
 
 
 class Adventurer:
@@ -12,6 +12,29 @@ class Adventurer:
         self.__vision_potions: int = 0
         self.__pillars: set = set()
 
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def game(self):
+        return self.__game
+
+    @property
+    def hit_points(self):
+        return self.__hit_points
+
+    @property
+    def healing_potions(self):
+        return self.__healing_potions
+
+    @property
+    def vision_potions(self):
+        return self.__vision_potions
+
+    @property
+    def pillars(self):
+        return self.__pillars
 
     def display_inventory(self):
         # Keeps a list of items in inventory
