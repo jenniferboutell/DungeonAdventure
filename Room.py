@@ -226,9 +226,9 @@ class Room:
         x = self.coord_x + _dir.vect_x
         y = self.coord_y + _dir.vect_y
         if not 0 <= x < _grid.width or not 0 <= y < _grid.height:
-            # print(f"neighbor: room({self.coords}) {_dir.name} -! ({x},{y}) outside grid")
+            # print(f"neighbor: room({self.coords}) {_dir.name} -!- ({x},{y}) outside grid")
             return None
-        # print(f"neighbor: room({self.coords}) {_dir.name} -> ({x},{y})")
+        # print(f"neighbor: room({self.coords}) {_dir.name} --> ({x},{y})")
         return _grid.room(x, y)
 
     @property
@@ -276,12 +276,12 @@ class Room:
         :exception ValueError if direction is not recognized
         """
         _d = Compass.dir(direction)
-        print(f"add_door: > room({self.coords}) {_d.name}")
+        # print(f"add_door: > room({self.coords}) {_d.name}")
         self.__doors_mask |= _d.mask
         _r = self.neighbor(direction)
         if _r is not None:
             _d = _d.opposite
-            print(f"add_door: < room({_r.coords}) {_d.name}")
+            # print(f"add_door: < room({_r.coords}) {_d.name}")
             _r.doors_mask |= _d.mask
 
     @property

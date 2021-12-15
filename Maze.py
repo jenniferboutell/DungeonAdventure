@@ -6,25 +6,17 @@ from Room import RoomStyle
 from Grid import Grid
 
 
-g_dbg_enabled = False
-
-
-def dbg_print(*args, **kwargs):
-    if g_dbg_enabled:
-        print(*args, **kwargs)
-
-
 class Maze(Grid):
 
-    def __init__(self, width: int = 4, height: int = 4, map_str: str = None) -> None:
+    def __init__(self,
+                 width: int = 4, height: int = 4,
+                 map_str: str = None,
+                 debug: bool = False) -> None:
         if map_str is not None:
-            width, height = Maze.parse_map(map_str=map_str)
+            width, height = Maze.parse_map(map_str=map_str, debug=debug)
         super().__init__(width=width, height=height)
-        dbg_print(f"initializing {self.width}x{self.height} grid")
-        if g_dbg_enabled:
-            print(f"{self}")
         if map_str is not None:
-            self.load_map(map_str=map_str)
+            self.load_map(map_str=map_str, debug=debug)
         # Initialization of other fields deferred to separate methods.
         self.__path: list[Any] = []
 
@@ -32,7 +24,38 @@ class Maze(Grid):
         Maze.parse_map(grid=self, **kwargs)
 
     @staticmethod
-    def parse_map(map_str: str = None, grid=None, style=RoomStyle):
+    def parse_map(map_str: str = None, grid=None, style=RoomStyle, debug=False):
+        """ Parse string containing specification for map.
+        Operates in one of two modes, depending upon whether grid is provided:
+
+        - grid is None - measure-only mode:
+          Returns dimensions necessary for a grid that can contain the map.
+          This is a quick estimate that assumes properly formatted input.
+
+        - grid present - full-load mode:
+          Fully parses map, populating the grid as specified in the map.
+          Non-static method load_map() is a thin wrapper for this mode,
+          since Maze is a Grid subclass.
+
+        Map format is identical to output format, except mixed-item 'M'
+        marker is replaced with multi-character list of markers for items,
+        with repetition where there are multiple of same item type,
+        e.g. "HHV" represents 2 health potions + 1 vision potion.
+
+        For measure-only mode, there is no validation of walls, doors, or
+        room contents, other than having expected width.
+
+        :param map_str: String containing specification for map.
+        :param grid: Grid of rooms of sufficient size to hold map.
+            If None, function instead operates in measure-only mode.
+        :param style: Map rendering style in which map is formatted.
+        :param debug: Whether to print debug info while parsing.
+            For troubleshooting mistakes in str_map (and/or bugs in parsing)
+        :return: In measure-only mode, returns a pair of ints representing
+            width and height, respectively, of necessary grid dimensions.
+            In full-load mode, returns None.
+        :exception ValueError, if map appears improperly formatted.
+        """
         wall_len: int = len(style.wall_n)
         line_len: int = 0
 
@@ -48,7 +71,8 @@ class Maze(Grid):
         char_num = 0
 
         def dbg_parse(*args, **kwargs):
-            dbg_print(f"L{line_num}C{char_num}: ", *args, **kwargs)
+            if debug:
+                print(f"L{line_num}C{char_num}: ", *args, **kwargs)
 
         lines = map_str.splitlines()
         for line in lines:
@@ -131,10 +155,6 @@ class Maze(Grid):
                 if not want_lat:
                     if r and c == style.door_w:
                         r.add_door(West)
-                        # if room to west, add_door() also adds east door to it
-                        # r2 = r.neighbor(West)
-                        # if r2:
-                        #     r2.add_door(East)
 
                 char_num += 1
 
@@ -152,10 +172,6 @@ class Maze(Grid):
                                 r.add_door(South)
                         elif wall == style.door_n:
                             r.add_door(North)
-                            # if there room to north, add_door() also adds south door to it
-                            # r2 = r.neighbor(North)
-                            # if r2:
-                            #     r2.add_door(South)
                 else:
                     contents = line[char_num:char_num+wall_len].strip()
                     dbg_parse(f"contents: {contents}")
