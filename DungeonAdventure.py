@@ -1,8 +1,8 @@
-# from Dungeon import Dungeon
+from Compass import Compass
 from Room import Room
 from Maze import Maze
 from Adventurer import Adventurer
-from random import randrange
+# from random import randrange
 
 
 class DungeonAdventure:
@@ -10,7 +10,7 @@ class DungeonAdventure:
     def __init__(self, map_str: str = None):
         self.__hero = Adventurer(self)
         self.__maze = Maze(map_str=map_str)
-        self.__room = self.__maze.room(0,0)
+        self.__room = self.__maze.room(0, 0)
         self.__continues: bool = True
 
     @property
@@ -54,12 +54,13 @@ class DungeonAdventure:
 
     @staticmethod
     def menu():
-        print("Here are your options...\n",
-              "Move (N)orth, (S)outh, (E)ast, or (W)est;\n",
-              "Use (V)ision Potion or (H)ealing Potion;\n"
-              "Display (I)nventory;\n"
-              "Show (M)ap; (Q)uit the game; or (?) to get help")
-        # Do NOT reveal the hidden '@' option to show full map
+        print("\n".join(["Here are your options...",
+                         "Move (N)orth, (S)outh, (E)ast, or (W)est;",
+                         "Use (V)ision Potion or (H)ealing Potion;",
+                         "Show (I)nventory; Show (M)ap;",
+                         "(Q)uit the game; or (?) to get help"]))
+        # Do NOT reveal the hidden options:
+        # (*) show full map, (@) describe current room
 
     def prompt(self):
         # Will need to pass in map here, or at least the four surrounding squares
@@ -84,7 +85,7 @@ class DungeonAdventure:
             # Hidden option! Print full maze
             print(f"{self.maze}")
 
-        elif option in ('put directions back here when real traversal ready'):
+        elif option in [_dir.abbr for _dir in Compass.dirs]:
             # Try going that direction; move returns False if cannot.
             if not self.hero.move(option):
                 print("There is no door in that direction.")
@@ -98,13 +99,13 @@ class DungeonAdventure:
         elif option == 'V':
             print("You guzzle down the crystal clear fluid.")
             self.__hero.use_vision_potion()
-            #Todo: finish ues vision potion method in Adventurer
+            # TODO: finish ues vision potion method in Adventurer
 
         elif option == "Joshua":
             print("A strange game. The only winning move is not to play.")
             # no-op
 
-        elif option =="I":
+        elif option == 'I':
             self.__hero.display_inventory()
 
         elif option in ('N', 'S', 'E', 'W'):
@@ -126,7 +127,7 @@ class DungeonAdventure:
             if self.__hero.hit_points <= 0:
                 self.__continues = False
             if self.__room.is_exit:
-                self.find_exit()  #Todo: add pillar logic
+                self.find_exit()  # TODO: add pillar logic
         else:
             print("These words that you are using... I do not think they mean\n",
                   "what you think they mean. Please try again.")
@@ -150,57 +151,12 @@ class DungeonAdventure:
         print("You fall into a pit. The fall is merely frightening; the landing hurts.")
         self.__hero.take_damage()
         print("You now have " + str(self.__hero.hit_points) + " hit points. Ouch.")
-        #To DO: fix adventurer so that damage is randomly set, and hit points statement set there as well.
+        # TODO: fix adventurer so that damage is randomly set, and hit points statement set there as well.
 
     def find_exit(self):
-        #todo: add this logic: if current room is exit
-            print("Dilly Dilly! Brave Brave Brave Brave Sir " + self.name + " has found the exit.")
-            self.__continues = False
-
-class MockAdventurer:
-
-    def __init__(self):
-        self.__name = None
-
-    @property
-    def name(self):
-        return self.__name
-
-    def set_name(self, val):
-        self.__name = val
-
-    @staticmethod
-    def move(_):
-        return randrange(4) % 4 == 1
-
-    @staticmethod
-    def use_healing_potion():
-        pass
-
-    @staticmethod
-    def use_vision_potion():
-        pass
-
-
-class MockGame:
-
-    def __init__(self, rounds: int = 10):
-        self.__rounds = rounds
-        self.__hero = MockAdventurer()
-
-    @property
-    def hero(self):
-        return self.__hero
-
-    def quit(self):
-        self.__rounds = 0
-
-    def play(self):
-        self.__io.start()
-
-        while self.continues():
-            self.__io.prompt()
-        self.__io.finish()
+        # TODO: add this logic: if current room is exit
+        print("Dilly Dilly! Brave Brave Brave Brave Sir " + self.name + " has found the exit.")
+        self.__continues = False
 
 
 if __name__ == "__main__":
