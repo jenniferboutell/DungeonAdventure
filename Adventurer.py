@@ -13,8 +13,12 @@ class Adventurer:
         self.__pillars: set = set()
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__name
+
+    @name.setter
+    def name(self, val: str) -> None:
+        self.__name = val
 
     @property
     def game(self):

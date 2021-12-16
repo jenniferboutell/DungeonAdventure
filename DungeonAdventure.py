@@ -7,21 +7,31 @@ from random import randrange
 
 class DungeonAdventure:
 
-    def __init__(self):
+    def __init__(self, map_str: str = None):
         self.__hero = Adventurer(self)
-        self.__maze = Maze()
+        self.__maze = Maze(map_str=map_str)
         self.__room = self.__maze.room(0,0)
+        self.__continues: bool = True
 
     @property
-    def hero(self):
+    def hero(self) -> Adventurer:
         return self.__hero
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.hero.name
 
-    def set_name(self, val):
-        self.hero.set_name(val)
+    @property
+    def maze(self) -> Maze:
+        return self.__maze
+
+    @property
+    def room(self) -> Room:
+        return self.__room
+
+    @property
+    def continues(self) -> bool:
+        return self.__continues
 
     def start(self):
         start_option = input("Shall we play a game? (Y/N)\n")
@@ -33,13 +43,14 @@ class DungeonAdventure:
         name = input("What is your name, brave warrior?\n")
         # FIXME basic validation of name
         # TODO strip() surrounding whitespace
-        self.set_name(name)
+        self.hero.name = name
         self.menu()
         self.prompt()
 
     def finish(self):
         print(f"Brave Sir {self.name} is at The End.")
         # TODO report what kind of ending
+        # TODO sys.exit() ...?
 
     @staticmethod
     def menu():
@@ -58,16 +69,19 @@ class DungeonAdventure:
 
         elif option == "Q":
             print(f"Brave Sir {self.name} ran away. Brave Brave Brave Brave Sir {self.name}.")
-            self.game.quit()
-            # exit()  # TODO do sys.exit() in main class, not here
+            self.__continues = False
 
         elif option == 'M':
             # TODO show visible map
             pass
 
         elif option == '@':
-            # TODO show full map
-            pass
+            # Hidden option! Describe current room
+            print(f"{self.room.describe()}")
+
+        elif option == '*':
+            # Hidden option! Print full maze
+            print(f"{self.maze}")
 
         elif option in ('put directions back here when real traversal ready'):
             # Try going that direction; move returns False if cannot.
@@ -90,12 +104,12 @@ class DungeonAdventure:
 
         elif option in ('N', 'S', 'E', 'W'):
             print(f"You take a step to the {option}...")
-            nextroom = self.__room.neighbor(option)
-            if nextroom is None:
+            next_room = self.__room.neighbor(option)
+            if next_room is None:
                 print("There is no room in this direction.")
                 return
-            self.__room = nextroom
-            self.__room.set_room()
+            self.__room = next_room
+            # self.__room.set_room()  # FIXME nope, rely on loaded map!
             print(self.__room)
             if self.__room.healing_potions:
                 self.find_healing_potion()
@@ -107,6 +121,12 @@ class DungeonAdventure:
             print("These words that you are using... I do not think they mean\n",
                   "what you think they mean. Please try again.")
             # no-op
+
+    def play(self):
+        self.start()
+        while self.continues:
+            self.prompt()
+        self.finish()
 
     def find_healing_potion(self):
         print("You find a healing potion. Use this to restore some lost hit-points.")
@@ -156,11 +176,6 @@ class MockGame:
     def quit(self):
         self.__rounds = 0
 
-    def continues(self):
-        if self.__rounds > 0:
-            self.__rounds -= 1
-        return bool(self.__rounds)
-
     def play(self):
         self.__io.start()
 
@@ -170,7 +185,17 @@ class MockGame:
 
 
 if __name__ == "__main__":
-    g_game = MockGame()
+
+    g_map_str = """
+# This is my fine dungeon
++-----+-----+-----+
+| i   |     = O   |
++--H--+--H--+-----+
+| P   = XV  = HH  |
++-----+-----+-----+
+"""
+
+    g_game = DungeonAdventure(map_str=g_map_str)
     g_game.play()
 
 # END
