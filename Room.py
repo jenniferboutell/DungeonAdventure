@@ -4,33 +4,48 @@ from Compass import *
 Coords = tuple[int, int]
 
 
-class RoomStyle:
-    corner: str = "+"
-    wall_n = "-----"
-    wall_s = wall_n
-    door_n = "--H--"
-    door_s = door_n
-    wall_w = "|"
-    wall_e = wall_w
-    door_w = "="
-    door_e = door_w
-    coords = False
+class RoomStyleBase:
+    def __init__(self, corner: str = "+",
+                 wall_n: str = "-----", wall_s: str = None,
+                 door_n: str = "--H--", door_s: str = None,
+                 wall_w: str = "|", wall_e: str = None,
+                 door_w: str = "=", door_e: str = None,
+                 coords: bool = False):
+        self.corner = corner
+        # N/S walls
+        self.wall_n = wall_n
+        if wall_s:
+            self.wall_s = wall_s
+        else:
+            self.wall_s = self.wall_n
+        # N/S doors
+        self.door_n = door_n
+        if door_s:
+            self.door_s = door_s
+        else:
+            self.door_s = self.door_n
+        # W/E walls
+        self.wall_w = wall_w
+        if wall_e:
+            self.wall_e = wall_e
+        else:
+            self.wall_e = self.wall_w
+        # W/E doors
+        self.door_w = door_w
+        if door_e:
+            self.door_e = door_e
+        else:
+            self.door_e = self.door_w
+        # Show coords instead of contents
+        self.coords = coords
 
 
-class RoomStyleCoords(RoomStyle):
-    coords = True
-
-
-class RoomStyleTom(RoomStyle):
-    corner = "*"
-    wall_n = "*****"
-    wall_s = wall_n
-    door_n = "* - *"
-    door_s = door_n
-    wall_w = "*"
-    wall_e = wall_w
-    door_w = "|"
-    door_e = door_w
+RoomStyle = RoomStyleBase()
+RoomStyleOpen = RoomStyleBase(door_n="     ", door_w=" ")
+RoomStyleCoords = RoomStyleBase(coords=True)
+RoomStyleTom = RoomStyleBase(corner="*",
+                             wall_n="*****", wall_w="*",
+                             door_n=" --- ", door_w="|")
 
 
 class RoomStr:
@@ -284,6 +299,24 @@ class Room:
             # print(f"add_door: < room({_r.coords}) {_d.name}")
             _r.doors_mask |= _d.mask
 
+    def del_door(self, direction) -> None:
+        """ Remove door (if any) in specified direction from self room, and likewise
+        from corresponding neighboring room, if one exists in that direction.
+        Exact opposite of add_door().
+
+        :param direction: Outward direction from room
+        :return None
+        :exception ValueError if direction is not recognized
+        """
+        _d = Compass.dir(direction)
+        # print(f"del_door: > room({self.coords}) {_d.name}")
+        self.__doors_mask &= ~_d.mask
+        _r = self.neighbor(direction)
+        if _r is not None:
+            _d = _d.opposite
+            # print(f"del_door: < room({_r.coords}) {_d.name}")
+            _r.doors_mask &= ~_d.mask
+
     @property
     def is_entrance(self) -> bool:
         return self.__is_entrance
@@ -333,6 +366,8 @@ class Room:
         self.__pillar = val
 
     def set_room(self, percent: int = 10):
+        # FIXME probably get rid of this; randomized contents are hard to test.
+        # Maze load_map() is almost always what you should be using instead.
         self.has_pit = random.randrange(100) < percent
         self.healing_potions = random.randrange(100) < percent
         self.vision_potions = random.randrange(100) < percent
@@ -383,12 +418,16 @@ if __name__ == '__main__':
     print(f"...with coords-style contents:")
     print(f"{RoomStr(g_r, style=RoomStyleCoords)}")
 
-    print(f"grid room, with doors and a potion:")
+    print(f"room with doors and a potion:")
     g_r.add_door('N')
     g_r.add_door('west')
     g_r.healing_potions += 2
     print(f"{g_r}")
-    print(f"description thereof:")
+    print(f"...description thereof:")
     print(g_r.describe())
+    print("...rendered with 'open' style doors:")
+    print(f"{RoomStr(g_r, style=RoomStyleOpen)}")
+    print("...rendered with Tom's janky style:")
+    print(f"{RoomStr(g_r, style=RoomStyleTom)}")
 
 # END

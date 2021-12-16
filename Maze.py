@@ -218,6 +218,10 @@ class Maze(Grid):
             want_lat = not want_lat
             dbg_parse(f"next up: row {grid_row} want_lat={want_lat}")
 
+    def generate(self):
+        # TODO
+        pass
+
 
 if __name__ == '__main__':
     print("Greetings from Maze!\n")

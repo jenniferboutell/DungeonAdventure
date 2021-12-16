@@ -74,11 +74,27 @@ class Grid:
         # If coords are out-of-bounds, just let resulting IndexError bubble up
         return self.__rooms[y][x]
 
+    def str(self, *args, **kwargs) -> str:
+        return str(GridStr(self, *args, **kwargs))
+
     def __str__(self) -> str:
-        return str(GridStr(self))
+        return self.str()
 
     def __repr__(self) -> str:
         return "".join([f"{row}\n" for row in self.__rooms])
+
+    def empty(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                r = self.room(x, y)
+                if y > 0:
+                    r.add_door(North)
+                if y + 1 < self.height:
+                    r.add_door(South)
+                if x > 0:
+                    r.add_door(West)
+                if x + 1 < self.width:
+                    r.add_door(East)
 
 
 if __name__ == '__main__':
@@ -101,5 +117,11 @@ if __name__ == '__main__':
     print(f"...and {g_w}x{g_h} subgrid with origin at parent coords ({g_x},{g_y})")
     g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(g_x, g_y))
     print(f"{g2}")
+
+    print("...and empty parent interior")
+    g1.empty()
+    print(f"{g1}")
+    print("...and render with open-door style")
+    print(f"{g1.str(style=RoomStyleOpen)}")
 
 # END
