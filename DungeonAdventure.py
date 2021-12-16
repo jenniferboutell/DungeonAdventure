@@ -1,4 +1,4 @@
-from Compass import Compass
+from Compass import Compass, CompassDirection
 from Room import Room
 from Maze import Maze
 from Adventurer import Adventurer
@@ -17,35 +17,59 @@ class DungeonAdventure:
     def hero(self) -> Adventurer:
         return self.__hero
 
+    @hero.setter
+    def hero(self, hero: Adventurer) -> None:
+        self.__hero = hero
+
     @property
     def name(self) -> str:
+        """ Name of Adventurer.
+        Not actually a property of DungeonAdventure class itself.
+        But used so often in dialogue, covenient to shorten the path to it.
+        Only set once though, so corresponding setter not really warranted.
+        """
         return self.hero.name
 
     @property
     def maze(self) -> Maze:
         return self.__maze
 
+    @maze.setter
+    def maze(self, maze: Maze) -> None:
+        self.__maze = maze
+
     @property
     def room(self) -> Room:
         return self.__room
 
+    @room.setter
+    def room(self, room: Room) -> None:
+        self.__room = room
+
     @property
     def continues(self) -> bool:
+        # TODO check for other failing conditions? e.g. hero.hit_points <= 0
         return self.__continues
 
-    def start(self):
-        start_option = input("Shall we play a game? (Y/N)\n")
-        if start_option == "N":
-            print("Commence global thermonuclear war in 3... 2... 1...")
-            print(".....haha, not really. That is scheduled for tomorrow.")
+    @continues.setter
+    def continues(self, tallyho: bool) -> None:
+        self.__continues = tallyho
 
-        print("Huzzah! Welcome to Dungeon Adventure, Adventurer")
-        name = input("What is your name, brave warrior?\n")
+    def prelude(self):
+        # intro gag, no actual effect
+        option = input("Shall we play a game? (Y/N)\n")
+        if option.upper() in ("N", 'NO'):
+            print("Commence global thermonuclear war in 3... 2... 1...")
+            print(".....haha, not really! That is scheduled for tomorrow.")
+            print()
+        # actual preamble
+        print("Huzzah! Welcome to Dungeon Adventure!")
+        name = input("What is your name, brave adventurer?\n")
         # FIXME basic validation of name
         # TODO strip() surrounding whitespace
         self.hero.name = name
         self.menu()
-        self.prompt()
+        # self.prompt()
 
     def finish(self):
         print(f"Brave Sir {self.name} is at The End.")
@@ -55,86 +79,97 @@ class DungeonAdventure:
     @staticmethod
     def menu():
         print("\n".join(["Here are your options...",
-                         "Move (N)orth, (S)outh, (E)ast, or (W)est;",
-                         "Use (V)ision Potion or (H)ealing Potion;",
-                         "Show (I)nventory; Show (M)ap;",
-                         "(Q)uit the game; or (?) to get help"]))
+                         "- Show (I)nventory or (M)ap",
+                         "- Move (N)orth, (S)outh, (E)ast, or (W)est",
+                         "- Use (V)ision Potion or (H)ealing Potion",
+                         "- (Q)uit game in disgust",
+                         "- (?) show these options again"]))
         # Do NOT reveal the hidden options:
         # (*) show full map, (@) describe current room
 
     def prompt(self):
-        # Will need to pass in map here, or at least the four surrounding squares
+        print()  # empty line to visually separate from preceding stanza
         option = input(f"What would you like to do, brave Sir {self.name}?\n")
+
+        def match(got: str, *wants) -> bool:
+            for want in wants:
+                if got.lower() == want.lower():
+                    return True
+            return False
 
         if option == '?':
             self.menu()
 
-        elif option == "Q":
-            print(f"Brave Sir {self.name} ran away. Brave Brave Brave Brave Sir {self.name}.")
-            self.__continues = False
+        elif match(option, 'Q', 'quit'):
+            print("Discretion is the better part of valor.")
+            print(f"Three cheers for brave Sir {self.name}!")
+            self.continues = False
 
-        elif option == 'M':
-            # TODO show visible map
-            pass
+        elif match(option, 'I', 'inventory'):
+            print("Thine Bag of Holding doth weigh upon you most ponderously...")
+            self.__hero.display_inventory()
 
-        elif option == '@':
+        elif match(option, 'M', 'map'):
+            print("Drat. Your map appears to have smeared and is now unreadable.")
+            # TODO show map of visited/seen rooms
+
+        elif match(option, '@', 'describe'):
             # Hidden option! Describe current room
-            print(f"{self.room.describe()}")
+            print("There is something about this room...")
+            print(str(self.room.describe()))
 
-        elif option == '*':
+        elif match(option, '*', 'joshua'):
             # Hidden option! Print full maze
-            print(f"{self.maze}")
+            if match(option, 'joshua'):
+                print("A strange game. The only winning move is not to play...")
+            else:
+                print("There is a sharp pain behind your eyes, then all is revealed...")
+            print(str(self.maze))
 
-        elif option in [_dir.abbr for _dir in Compass.dirs]:
-            # Try going that direction; move returns False if cannot.
-            if not self.hero.move(option):
-                print("There is no door in that direction.")
-                print(f"And lo, for Brave, Brave, Brave Sir {self.name} did stand still.")
-            print(f"You take a step to the {option}...")
-
-        elif option == 'H':
+        elif match(option, 'H', 'healing', 'health'):
             print("You guzzle down the sweet, sweet elixir or life.")
             self.__hero.use_healing_potion()
 
-        elif option == 'V':
-            print("You guzzle down the crystal clear fluid.")
+        elif match(option, 'V', 'vision'):
+            print("You swig the crystal clear fluid, gasp, then stare in amazement...")
             self.__hero.use_vision_potion()
-            # TODO: finish ues vision potion method in Adventurer
+            # TODO: finish use_vision_potion method in Adventurer
+            # TODO fetch 3x3 subgrid centered at current room, and display
 
-        elif option == "Joshua":
-            print("A strange game. The only winning move is not to play.")
-            # no-op
-
-        elif option == 'I':
-            self.__hero.display_inventory()
-
-        elif option in ('N', 'S', 'E', 'W'):
+        elif Compass.dir(option):
+            _dir: CompassDirection = Compass.dir(option)
+            # Try going that direction
+            # TODO was this supposed to go into self.hero.move(_dir)...?
+            # If so, move() returns False if cannot traverse that direction.
             next_room = self.__room.neighbor(option)
             if next_room is None:
-                print("There is no room in this direction.")
-                print(f"And lo, for Brave, Brave, Brave Sir {self.name} did stand still.")
+                print(f"You take a step to the {_dir.name}... but are thwarted.")
+                print(f"Brave Sir {self.name} didst stare defiantly at his shoes.")
                 return
-            print(f"You take a step to the {option}...")
-            self.__room = next_room
-            # self.__room.set_room()  # FIXME nope, rely on loaded map!
-            print(self.__room)
-            if self.__room.healing_potions:
+            print(f"You bound jauntily to the {_dir.name}...")
+            print(next_room)
+            self.room = next_room
+            # self.room.set_room()  # FIXME nope, rely on loaded map!
+            if self.room.healing_potions:
                 self.find_healing_potion()
-            if self.__room.vision_potions:
+            if self.room.vision_potions:
                 self.find_vision_potion()
-            if self.__room.has_pit:
+            if self.room.has_pit:
                 self.fall_into_pit()
-            if self.__hero.hit_points <= 0:
-                self.__continues = False
-            if self.__room.is_exit:
+            if self.hero.hit_points <= 0:
+                self.continues = False
+            if self.room.is_exit:
                 self.find_exit()  # TODO: add pillar logic
+
         else:
-            print("These words that you are using... I do not think they mean\n",
-                  "what you think they mean. Please try again.")
+            print()  # empty line for visual separation
+            print("These words that you are using...")
+            print("I do not think they mean what you think they mean.")
+            print("Perhaps your response should be in the form of a '?'...")
             # no-op
 
     def play(self):
-        self.start()
+        self.prelude()
         while self.continues:
             self.prompt()
         self.finish()
@@ -150,7 +185,7 @@ class DungeonAdventure:
     def fall_into_pit(self):
         print("You fall into a pit. The fall is merely frightening; the landing hurts.")
         self.__hero.take_damage()
-        print("You now have " + str(self.__hero.hit_points) + " hit points. Ouch.")
+        print("You now have " + str(self.__hero.hit_points) + " hit-points. Ouch.")
         # TODO: fix adventurer so that damage is randomly set, and hit points statement set there as well.
 
     def find_exit(self):
