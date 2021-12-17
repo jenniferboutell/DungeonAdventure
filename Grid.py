@@ -4,10 +4,10 @@ Coords = tuple[int, int]
 
 
 class GridStr:
-    __style_default = RoomStyle
+    __style_default = Room.styles.default
 
     @classmethod
-    def set_style_default(cls, style):
+    def set_style_default(cls, style: RoomStyleBase):
         cls.__style_default = style
 
     def __init__(self, grid, style=None):
@@ -37,6 +37,10 @@ class GridStr:
 
 
 class Grid:
+
+    @staticmethod
+    def set_style_default(style):
+        GridStr.set_style_default(style=style)
 
     def __init__(self, width=2, height=2, from_grid=None, from_coords: Coords = None):
         if from_coords is not None:
@@ -104,7 +108,7 @@ if __name__ == '__main__':
     print(f"default grid is {g.width}x{g.height}:")
     print(f"{g}")
 
-    GridStr.set_style_default(RoomStyleCoords)
+    GridStr.set_style_default(Room.styles.coords)
     g_w = 4
     g_h = 5
     print(f"parent {g_w}x{g_h} grid:")
@@ -122,6 +126,6 @@ if __name__ == '__main__':
     g1.empty()
     print(f"{g1}")
     print("...and render with open-door style")
-    print(f"{g1.str(style=RoomStyleOpen)}")
+    print(f"{g1.str(style=Room.styles.open)}")
 
 # END

@@ -1,9 +1,12 @@
 from typing import Any
-# import random
+from random import randrange
+from time import sleep
 
-from Compass import North, South, East, West
-from Room import RoomStyle
+# from Compass import *
+from Room import *
 from Grid import Grid
+
+Coords = tuple[int, int]
 
 
 class Maze(Grid):
@@ -17,6 +20,8 @@ class Maze(Grid):
         super().__init__(width=width, height=height)
         if map_str is not None:
             self.load_map(map_str=map_str, debug=debug)
+        else:
+            self.empty()
         # Initialization of other fields deferred to separate methods.
         self.__path: list[Any] = []
 
@@ -24,7 +29,9 @@ class Maze(Grid):
         Maze.parse_map(grid=self, **kwargs)
 
     @staticmethod
-    def parse_map(map_str: str = None, grid=None, style=RoomStyle, debug=False):
+    def parse_map(map_str: str = None, grid=None,
+                  style: RoomStyleBase = Room.styles.default,
+                  debug=False):
         """ Parse string containing specification for map.
         Operates in one of two modes, depending upon whether grid is provided:
 
@@ -218,18 +225,83 @@ class Maze(Grid):
             want_lat = not want_lat
             dbg_parse(f"next up: row {grid_row} want_lat={want_lat}")
 
-    def generate(self):
-        # TODO
-        pass
+    @staticmethod
+    def __clear_screen():
+        print("clear screen...")
+        print('\033c', end='')
+
+    def __rec_div(self, origin: Coords = None, dimens: Coords = None,
+                  debug: bool = False, animate: bool = False) -> None:
+        """ One round of recursive division.
+        :param origin:
+        :param dimens:
+        :return: None
+        """
+        def __dbg_print(*args, **kwargs):
+            if debug:
+                print(*args, **kwargs)
+
+        if debug and animate:
+            sleep(1)
+            Maze.__clear_screen()
+            __dbg_print(f"{self}")
+
+        __dbg_print(f"origin:{str(origin):10} dimens:{str(dimens):10}")
+        (x, y) = origin
+        (w, h) = dimens
+        if w == 1 or h == 1:
+            __dbg_print("no-op")
+            return
+        w_mid = randrange(1, w)
+        h_mid = randrange(1, h)
+        if w > h:
+            # split into W/E parts
+            __dbg_print(f"split into W/E parts at {x+w_mid}")
+            for y_i in range(y, y+h):
+                if y_i == y+h_mid:
+                    continue
+                r = self.room(x+w_mid-1, y_i)
+                r.add_wall(East)
+            # recurse into both parts
+            self.__rec_div(origin=(x, y), dimens=(w_mid, h),
+                           debug=debug, animate=animate)
+            self.__rec_div(origin=(x+w_mid, y), dimens=(w-w_mid, h),
+                           debug=debug, animate=animate)
+        else:
+            # split into N/S parts
+            __dbg_print(f"split into N/S parts at {y+h_mid}")
+            for x_i in range(x, x+w):
+                if x_i == x+w_mid:
+                    continue
+                r = self.room(x_i, y+h_mid-1)
+                r.add_wall(South)
+            # recurse into both parts
+            self.__rec_div(origin=(x, y), dimens=(w, h_mid),
+                           debug=debug, animate=animate)
+            self.__rec_div(origin=(x, y+h_mid), dimens=(w, h-h_mid),
+                           debug=debug, animate=animate)
+
+    def generate_rec_div(self, *args, **kwargs):
+        """ Generate maze via Recursive Division algorithm.
+        :return: None
+        """
+        self.__rec_div((0, 0), (self.width, self.height), *args, **kwargs)
+
+    def generate(self, *args, **kwargs):
+        """ Generate maze.
+        For now, only has one algorithm. But could implement more...
+        :return: None
+        """
+        self.generate_rec_div(*args, **kwargs)
 
 
 if __name__ == '__main__':
     print("Greetings from Maze!\n")
 
     # Default 4x4 grid, no doors yet
-    m = Maze()
-    print(f"default maze is {m.width}x{m.height}:")
-    print(m)
+    g_m = Maze()
+    print(f"default maze is {g_m.width}x{g_m.height}:")
+    print(g_m)
 
     # Measure canned
     print(f"canned dungeon:")
@@ -256,10 +328,19 @@ if __name__ == '__main__':
 +-----+-----+-----+
 """.lstrip()
     print(g_map_str)
-    print(f"...now do full load...")
-    m = Maze(map_str=g_map_str)
-    print(f"...reports dimensions {m.width}x{m.height}")
+    print(f"...now do full load:")
+    g_m = Maze(map_str=g_map_str)
+    print(f"...reports dimensions {g_m.width}x{g_m.height}")
     print(f"...and re-render:")
-    print(f"{m}")
+    print(f"{g_m}")
+
+    # Generate with Recursive Division algo
+    Grid.set_style_default(Room.styles.open)
+    g_m = Maze(width=7, height=7)
+    print(f"start from empty grid {g_m.width}x{g_m.height}:")
+    print(g_m)
+    print(f"...generate maze with Recursive Division algo:")
+    g_m.generate_rec_div(debug=False, animate=False)
+    print(g_m)
 
 # END

@@ -40,12 +40,25 @@ class RoomStyleBase:
         self.coords = coords
 
 
-RoomStyle = RoomStyleBase()
+RoomStyleDefault = RoomStyleBase()
+
+RoomStyle = RoomStyleDefault
+
 RoomStyleOpen = RoomStyleBase(door_n="     ", door_w=" ")
+
 RoomStyleCoords = RoomStyleBase(coords=True)
+
 RoomStyleTom = RoomStyleBase(corner="*",
                              wall_n="*****", wall_w="*",
                              door_n=" --- ", door_w="|")
+
+
+class RoomStyles:
+    base = RoomStyle
+    default = RoomStyleDefault
+    open = RoomStyleOpen
+    coords = RoomStyleCoords
+    tom = RoomStyleTom
 
 
 class RoomStr:
@@ -68,7 +81,7 @@ class RoomStr:
     *-*
     """
 
-    def __init__(self, _room, skip_north=None, skip_west=None, style=RoomStyle):
+    def __init__(self, _room, skip_north=None, skip_west=None, style=RoomStyleDefault):
         self.room = _room
         self.lines = []
         skip_north = bool(skip_north)
@@ -147,6 +160,8 @@ class RoomStr:
 
 
 class Room:
+    styles = RoomStyles
+
     """
     - (0/1) Entrance - only one room is an entrance, and that room contains NOTHING else
     - (0/1) Exit - only one room is an exit, and that room contains NOTHING else
@@ -317,6 +332,12 @@ class Room:
             # print(f"del_door: < room({_r.coords}) {_d.name}")
             _r.doors_mask &= ~_d.mask
 
+    def add_wall(self, direction) -> None:
+        self.del_door(direction)
+
+    def del_wall(self, direction) -> None:
+        self.add_door(direction)
+
     @property
     def is_entrance(self) -> bool:
         return self.__is_entrance
@@ -331,7 +352,7 @@ class Room:
 
     @is_exit.setter
     def is_exit(self, val: bool) -> None:
-        self.__is_exit= val
+        self.__is_exit = val
 
     @property
     def has_pit(self) -> bool:
@@ -396,8 +417,11 @@ class Room:
             f"Pillar:  {self.pillar}",
         ])
 
+    def str(self, *args, **kwargs) -> str:
+        return str(RoomStr(self, *args, **kwargs))
+
     def __str__(self) -> str:
-        return str(RoomStr(self))
+        return self.str()
 
     def __repr__(self) -> str:
         return RoomStr(self).room_coords()
@@ -410,13 +434,13 @@ if __name__ == '__main__':
     g_r = Room()
     print(f"{g_r}")
     print(f"...with coords-style contents, but hey no coords:")
-    print(f"{RoomStr(g_r, style=RoomStyleCoords)}")
+    print(f"{g_r.str(style=Room.styles.coords)}")
 
     print(f"grid room, empty and sealed:")
     g_r = Room(coords=(2, 3))
     print(f"{g_r}")
     print(f"...with coords-style contents:")
-    print(f"{RoomStr(g_r, style=RoomStyleCoords)}")
+    print(f"{g_r.str(style=Room.styles.coords)}")
 
     print(f"room with doors and a potion:")
     g_r.add_door('N')
@@ -426,8 +450,8 @@ if __name__ == '__main__':
     print(f"...description thereof:")
     print(g_r.describe())
     print("...rendered with 'open' style doors:")
-    print(f"{RoomStr(g_r, style=RoomStyleOpen)}")
+    print(f"{g_r.str(style=Room.styles.open)}")
     print("...rendered with Tom's janky style:")
-    print(f"{RoomStr(g_r, style=RoomStyleTom)}")
+    print(f"{g_r.str(style=Room.styles.tom)}")
 
 # END
