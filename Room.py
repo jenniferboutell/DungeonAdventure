@@ -4,13 +4,16 @@ from Compass import *
 Coords = tuple[int, int]
 
 
-class RoomStyleBase:
+class RoomStyle:
     def __init__(self, corner: str = "+",
                  wall_n: str = "-----", wall_s: str = None,
                  door_n: str = "--H--", door_s: str = None,
                  wall_w: str = "|", wall_e: str = None,
                  door_w: str = "=", door_e: str = None,
-                 coords: bool = False):
+                 coords: bool = False,
+                 crumbs: bool = False,
+                 heroin: bool = True,
+                 ):
         self.corner = corner
         # N/S walls
         self.wall_n = wall_n
@@ -36,37 +39,45 @@ class RoomStyleBase:
             self.door_e = door_e
         else:
             self.door_e = self.door_w
+
         # Show coords instead of contents
-        self.coords = coords
+        if self.wall_len >= 4:
+            self.coords = coords
+        else:
+            self.coords = False
 
+        # Extra mark if hero present or, if not (or option disabled),
+        # whether hero has visited/seen room
+        if self.wall_len >= 2:
+            # Hero in now
+            self.heroin = heroin
+            self.crumbs = crumbs
+        else:
+            self.heroin = False
+            self.crumbs = False
 
-RoomStyleDefault = RoomStyleBase()
-
-RoomStyle = RoomStyleDefault
-
-RoomStyleOpen = RoomStyleBase(door_n="     ", door_w=" ")
-
-RoomStyleCoords = RoomStyleBase(coords=True)
-
-RoomStyleTom = RoomStyleBase(corner="*",
-                             wall_n="*****", wall_w="*",
-                             door_n=" --- ", door_w="|")
+    @property
+    def wall_len(self) -> int:
+        return len(self.wall_n)
 
 
 class RoomStyles:
-    base = RoomStyle
-    default = RoomStyleDefault
-    open = RoomStyleOpen
-    coords = RoomStyleCoords
-    tom = RoomStyleTom
+    base = RoomStyle()
+    open = RoomStyle(door_n="     ", door_w=" ")
+    coords = RoomStyle(coords=True)
+    tom = RoomStyle(corner="*",
+                    wall_n="*****", wall_w="*",
+                    door_n=" --- ", door_w="|")
+    tracker = RoomStyle(heroin=True, crumbs=True)
+    default = base
 
 
 class RoomStr:
     """
     Builds a ASCII-text representation of room.
     Boundaries are single char wide, with wall and door represented differently.
-    In cCenter, single char that represents what the room contains.
-    M - Multiple Items
+    In center, single char that represents what the room contains.
+    M - Mix of Items
     X - Pit
     i - Entrance (In)
     O - Exit (Out)
@@ -75,13 +86,38 @@ class RoomStr:
     <space> - Empty Room
     A, E, I, P - Pillars
 
-    Example:  Room 1,1 might look like
-    *-*
-    |P|
-    *-*
+    Additional markers, separate from contents. Only shown in some styles.
+    . - Breadcrumb, i.e. room has been visited/seen
+    @ - Adventurer themselves
+
+    Rendering style is somewhat configurable, with several canned styles being
+    available via Room.styles.* elements. See class RoomStyle for more details.
+
+    Example:  Room at coordinates (1,1) with one of the Pillars and doors to
+    East and South, in several styles:
+
+    Default:
+    +-----+
+    | P.  =
+    +--H--+
+
+    Coords (Default with coordinates instead of contents):
+    +-----+
+    | 1,1 =
+    +--H--+
+
+    Tom:
+    *******
+    * P   |
+    * --- *
+
+    Open (Default with blanks instead of doors):
+    +-----+
+    | P    <--(blank padded East boundary, including doorway)
+    +     +
     """
 
-    def __init__(self, _room, skip_north=None, skip_west=None, style=RoomStyleDefault):
+    def __init__(self, _room, skip_north=None, skip_west=None, style=RoomStyles.default):
         self.room = _room
         self.lines = []
         skip_north = bool(skip_north)
@@ -99,18 +135,37 @@ class RoomStr:
             line += style.corner
             self.lines.append(line)
 
-        # west/middle/east
+        # west side
         line = ""
         if not skip_west:
             if _room.has_door(West):
                 line += style.door_w
             else:
                 line += style.wall_w
+
+        # center: contents and/or attributes
         if style.coords:
-            r = self.room_coords()
+            # NOTE no attempt made to deal len(room_coords) > style.wall_len
+            center = self.room_coords()
         else:
-            r = self.room_contents()
-        line += f" {r:<3} "
+            center = self.room_contents()
+        # additional indicators
+        if style.heroin and _room.has_hero:
+            center += '@'
+        if style.crumbs and _room.has_crumb:
+            center += '.'
+        # If style wide enough, pad with one blankspace on either side.
+        # If only space for padding on one side, then pad left only.
+        if style.wall_len >= 3:
+            if len(center) + 1 <= style.wall_len:
+                center = ' ' + center
+        # Pad right, to reach fixed-width center
+        if len(center) + 1 <= style.wall_len:
+            pad = ' ' * (style.wall_len - len(center))
+            center += pad
+        line += center
+
+        # east side
         if _room.has_door(East):
             line += style.door_e
         else:
@@ -153,7 +208,7 @@ class RoomStr:
         elif _r.pillar:
             return _r.pillar
         else:
-            return ' '
+            return ''
 
     def __str__(self):
         return "".join([f"{line}\n" for line in self.lines])
@@ -183,7 +238,10 @@ class Room:
                  has_pit: bool = False,
                  healing_potions: int = 0,
                  vision_potions: int = 0,
-                 pillar: str = None) -> None:
+                 pillar: str = None,
+                 has_crumb: bool = None,
+                 has_hero: bool = None,
+                 ) -> None:
         self.__grid = grid
         self.__coords: Coords = coords
         self.__is_entrance: bool = is_entrance
@@ -199,6 +257,8 @@ class Room:
             self.__doors_mask = Compass.dirs2mask(doors_list)
         else:
             self.__doors_mask = doors_mask
+        self.__has_crumb: bool = has_crumb
+        self.__has_hero: bool = has_hero
 
     @property
     def grid(self):
@@ -386,6 +446,22 @@ class Room:
     def pillar(self, val: str) -> None:
         self.__pillar = val
 
+    @property
+    def has_crumb(self) -> bool:
+        return self.__has_crumb
+
+    @has_crumb.setter
+    def has_crumb(self, val: bool) -> None:
+        self.__has_crumb = val
+
+    @property
+    def has_hero(self) -> bool:
+        return self.__has_hero
+
+    @has_hero.setter
+    def has_hero(self, val: bool) -> None:
+        self.__has_hero = val
+
     def set_room(self, percent: int = 10):
         # FIXME probably get rid of this; randomized contents are hard to test.
         # Maze load_map() is almost always what you should be using instead.
@@ -442,6 +518,12 @@ if __name__ == '__main__':
     print(f"...with coords-style contents:")
     print(f"{g_r.str(style=Room.styles.coords)}")
 
+    print(f"...coords large enough to squeeze out padding")
+    g_r = Room(coords=(3, 10))
+    print(f"{g_r.str(style=Room.styles.coords)}")
+    g_r = Room(coords=(10, 10))
+    print(f"{g_r.str(style=Room.styles.coords)}")
+
     print(f"room with doors and a potion:")
     g_r.add_door('N')
     g_r.add_door('west')
@@ -453,5 +535,13 @@ if __name__ == '__main__':
     print(f"{g_r.str(style=Room.styles.open)}")
     print("...rendered with Tom's janky style:")
     print(f"{g_r.str(style=Room.styles.tom)}")
+
+    print(f"...rendered tracker style, and hero present:")
+    g_r.has_hero = True
+    print(f"{g_r.str(style=Room.styles.tracker)}")
+    print(f"...or hero not present, but has visited/seen:")
+    g_r.has_hero = False
+    g_r.has_crumb = True
+    print(f"{g_r.str(style=Room.styles.tracker)}")
 
 # END

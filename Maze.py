@@ -30,7 +30,7 @@ class Maze(Grid):
 
     @staticmethod
     def parse_map(map_str: str = None, grid=None,
-                  style: RoomStyleBase = Room.styles.default,
+                  style: RoomStyle = Room.styles.default,
                   debug=False):
         """ Parse string containing specification for map.
         Operates in one of two modes, depending upon whether grid is provided:

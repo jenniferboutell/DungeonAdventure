@@ -7,7 +7,7 @@ class GridStr:
     __style_default = Room.styles.default
 
     @classmethod
-    def set_style_default(cls, style: RoomStyleBase):
+    def set_style_default(cls, style: Room.styles.base):
         cls.__style_default = style
 
     def __init__(self, grid, style=None):
