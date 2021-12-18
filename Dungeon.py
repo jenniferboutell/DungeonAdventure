@@ -8,6 +8,7 @@ class Dungeon(Maze):
     """
     TODO docs
     """
+    item_chance: int = 10  # percent chance given item type appears in room
 
     def __init__(self, *args, **kwargs):
         """
@@ -48,7 +49,7 @@ class Dungeon(Maze):
         empties: list[Room] = []
         for row in self.rooms:
             for room in row:
-                if room.is_empty:
+                if room.is_empty and not room.is_entrance and not room.is_exit:
                     empties.append(room)
         return empties
 
@@ -78,7 +79,8 @@ class Dungeon(Maze):
         if len(empties) < len(missing):
             raise ValueError("Dungeon maze has no empty Rooms in which to add missing Pillars")
         for pillar in missing:
-            room = empties[randrange(len(empties))]
+            i = randrange(len(empties))
+            room = empties.pop(i)
             room.pillar = pillar
         return
 
@@ -87,8 +89,12 @@ class Dungeon(Maze):
         :param room: Room to have some random item(s) added.
         :return: None
         """
-        # TODO
-        pass
+        if randrange(100) < Dungeon.item_chance:
+            room.has_pit = True
+        while randrange(100) < Dungeon.item_chance:
+            room.healing_potions += 1
+        while randrange(100) < Dungeon.item_chance:
+            room.vision_potions += 1
 
     def add_contents(self) -> None:
         """ Check for other items, add if NONE are present.
