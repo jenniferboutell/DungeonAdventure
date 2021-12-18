@@ -11,7 +11,7 @@ Coords = tuple[int, int]
 
 class Maze(Grid):
     """
-    TODO
+    Class that assembles and generates maze
     """
 
     def __init__(self,
@@ -19,11 +19,11 @@ class Maze(Grid):
                  map_str: str = None,
                  debug: bool = False) -> None:
         """
-        TODO
-        :param width:
-        :param height:
-        :param map_str:
-        :param debug:
+        Initializes maze class
+        :param width: number of cells across
+        :param height: number of cells down
+        :param map_str: string representation of map
+        :param debug: boolean to trigger debugging mode
         """
         if map_str is not None:
             width, height = Maze.parse_map(map_str=map_str, debug=debug)
@@ -42,7 +42,7 @@ class Maze(Grid):
     @property
     def ingress(self) -> Optional[Room]:
         """
-        TODO docs
+        returns entry point
         :return:
         """
         return self.__ingress
@@ -50,8 +50,8 @@ class Maze(Grid):
     @ingress.setter
     def ingress(self, room: Room) -> None:
         """
-        TODO docs
-        :param room:
+        Sets entry point as room
+        :param room: Instance of Room
         :return:
         """
         self.__ingress = room
@@ -59,7 +59,7 @@ class Maze(Grid):
     @property
     def egress(self) -> Optional[Room]:
         """
-        TODO docs
+        Returns exit point
         :return:
         """
         return self.__egress
@@ -67,16 +67,16 @@ class Maze(Grid):
     @egress.setter
     def egress(self, room: Room) -> None:
         """
-        TODO docs
-        :param room:
+        Sets exit point as room
+        :param room: instance of Room
         :return:
         """
         self.__egress = room
 
     def load_map(self, **kwargs):
         """
-        TODO
-        :param kwargs:
+        Loads map of maze
+        :param kwargs: keyword arguments
         :return:
         """
         Maze.parse_map(grid=self, **kwargs)
@@ -86,8 +86,6 @@ class Maze(Grid):
                     self.ingress = room
                 if room.is_exit:
                     self.egress = room
-                # TODO raise error if multiple found?
-        # TODO raise error if either is missing
 
     @staticmethod
     def parse_map(map_str: str = None, grid=None,
@@ -259,7 +257,6 @@ class Maze(Grid):
                             r.pillar = c
                         else:
                             raise ValueError(f"{c} in room {r.coords} not recognized")
-                    # TODO raise error if Entrance, Exit or Pillar present but not alone
                 char_num += wall_len
 
                 if not east_edge:
@@ -291,7 +288,7 @@ class Maze(Grid):
     @staticmethod
     def __clear_screen():
         """
-        TODO
+        Clears the screen
         :return:
         """
         print("clear screen...")
@@ -300,9 +297,8 @@ class Maze(Grid):
     def __rec_div(self, origin: Coords = None, dimens: Coords = None,
                   debug: bool = False, animate: bool = False) -> None:
         """ One round of recursive division.
-        TODO
-        :param origin:
-        :param dimens:
+        :param origin: coordinates of origin
+        :param dimens: dimensions
         :return: None
         """
         def __dbg_print(*args, **kwargs):
@@ -377,9 +373,9 @@ class Maze(Grid):
 
     def can_move(self, from_room: Room, direction: CompassDirection) -> tuple[bool, Optional[Room]]:
         """
-        TODO
-        :param from_room:
-        :param direction:
+        Determine if room has door in direction
+        :param from_room: instance of Room that you are moving from
+        :param direction: Direction in which you are moving
         :return:
         """
         # print(f"can_move from_room...\n{from_room}")
