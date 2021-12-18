@@ -5,6 +5,9 @@ Coords = tuple[int, int]
 
 
 class RoomStyle:
+    """
+    TODO docs
+    """
     def __init__(self, corner: str = "+",
                  wall_n: str = "-----", wall_s: str = None,
                  door_n: str = "--H--", door_s: str = None,
@@ -14,6 +17,21 @@ class RoomStyle:
                  crumbs: bool = False,
                  heroin: bool = True,
                  ):
+        """
+        TODO docs
+        :param corner:
+        :param wall_n:
+        :param wall_s:
+        :param door_n:
+        :param door_s:
+        :param wall_w:
+        :param wall_e:
+        :param door_w:
+        :param door_e:
+        :param coords:
+        :param crumbs:
+        :param heroin:
+        """
         self.corner = corner
         # N/S walls
         self.wall_n = wall_n
@@ -58,10 +76,17 @@ class RoomStyle:
 
     @property
     def wall_len(self) -> int:
+        """
+        TODO docs
+        :return:
+        """
         return len(self.wall_n)
 
 
 class RoomStyles:
+    """
+    TODO docs
+    """
     base = RoomStyle()
     open = RoomStyle(door_n="     ", door_w=" ")
     coords = RoomStyle(coords=True)
@@ -118,6 +143,13 @@ class RoomStr:
     """
 
     def __init__(self, _room, skip_north=None, skip_west=None, style=RoomStyles.default):
+        """
+        TODO docs
+        :param _room:
+        :param skip_north:
+        :param skip_west:
+        :param style:
+        """
         self.room = _room
         self.lines = []
         skip_north = bool(skip_north)
@@ -185,6 +217,10 @@ class RoomStr:
 
     # reporting only coords, rather than contents, is useful for testing
     def room_coords(self) -> str:
+        """
+        TODO docs
+        :return:
+        """
         _r = self.room
         if _r.coords is not None:
             return f"{_r.coord_x},{_r.coord_y}"
@@ -192,6 +228,10 @@ class RoomStr:
             return "#,#"
 
     def room_contents(self) -> str:
+        """
+        TODO docs
+        :return:
+        """
         _r = self.room
         if _r.has_mixed_contents:
             return 'M'
@@ -211,24 +251,25 @@ class RoomStr:
             return ''
 
     def __str__(self):
+        """
+        TODO docs
+        :return:
+        """
         return "".join([f"{line}\n" for line in self.lines])
 
 
 class Room:
-    styles = RoomStyles
-
     """
+    A room in the Dungeon. May have:
     - (0/1) Entrance - only one room is an entrance, and that room contains NOTHING else
     - (0/1) Exit - only one room is an exit, and that room contains NOTHING else
     - (0/1) Pillar of OO - one of four unique Pillars of Object Oriented Programming
     - (0-4) Doors - N, S, E, W
-    - 10% possibility (constant, but can modify) any item-bearing room will contain
-      a healing potion, vision potion, or pit -- independent of one another
+    - (0+) Healing Potion - restore some lost hit points
     - (0+) Vision Potion - can be used to allow user to see eight rooms surrounding
       current room as well as current room (if on maze edge, less than 8)
-
-    - __str__() that builds an ASCII-art representation of the room; see RoomStr.
     """
+    styles = RoomStyles
 
     def __init__(self, grid=None, coords: Coords = None,
                  is_entrance: bool = False,
@@ -242,6 +283,21 @@ class Room:
                  has_crumb: bool = None,
                  has_hero: bool = None,
                  ) -> None:
+        """
+        TODO docs
+        :param grid:
+        :param coords:
+        :param is_entrance:
+        :param is_exit:
+        :param doors_mask:
+        :param doors_list:
+        :param has_pit:
+        :param healing_potions:
+        :param vision_potions:
+        :param pillar:
+        :param has_crumb:
+        :param has_hero:
+        """
         self.__grid = grid
         self.__coords: Coords = coords
         self.__is_entrance: bool = is_entrance
@@ -262,6 +318,10 @@ class Room:
 
     @property
     def grid(self):
+        """
+        TODO docs
+        :return:
+        """
         return self.__grid
 
     @property
@@ -274,12 +334,20 @@ class Room:
 
     @property
     def coord_x(self) -> Optional[int]:
+        """
+        TODO docs
+        :return:
+        """
         if self.coords is not None:
             return self.coords[0]
         return None
 
     @property
     def coord_y(self) -> Optional[int]:
+        """
+        TODO docs
+        :return:
+        """
         if self.coords is not None:
             return self.coords[1]
         return None
@@ -303,8 +371,7 @@ class Room:
         """ Get neighboring room in specified direction from self room.
         :param direction: Direction of neighboring room wrt self room.
         :return: Neighboring room, if there is one; otherwise None.
-
-        Exception only raised for direction; attempting to fetch a hypothetical
+        :exception: only raised for direction; attempting to fetch a hypothetical
         neighbor that would lie outside the grid returns None.
         """
         _dir = Compass.dir(direction)
@@ -323,15 +390,28 @@ class Room:
 
     @property
     def doors_mask(self) -> int:
+        """
+        TODO docs
+        :return:
+        """
         return self.__doors_mask
 
     # TODO merge doors setters into single method that accepts all formats
     @doors_mask.setter
     def doors_mask(self, doors_mask: int) -> None:
+        """
+        TODO docs
+        :param doors_mask:
+        :return:
+        """
         self.__doors_mask = doors_mask
 
     @property
     def doors(self) -> list:
+        """
+        TODO docs
+        :return:
+        """
         return Compass.mask2dirs(self.__doors_mask)
 
     # @doors.setter
@@ -340,13 +420,23 @@ class Room:
 
     @property
     def doors_str(self) -> str:
+        """
+        TODO docs
+        :return:
+        """
         return ','.join([d.name[0] for d in self.doors])
 
+    # TODO
     # @doors_str.setter
     # def doors_str(self, doors_str: str) -> None:
-    #     self.__doors_mask = # TODO
+    #     self.__doors_mask = .....
 
     def has_door(self, direction) -> bool:
+        """
+        TODO docs
+        :param direction:
+        :return:
+        """
         return bool(self.__doors_mask & Compass.dir(direction).mask)
 
     def add_door(self, direction) -> None:
@@ -393,73 +483,155 @@ class Room:
             _r.doors_mask &= ~_d.mask
 
     def add_wall(self, direction) -> None:
+        """
+        TODO docs
+        :param direction:
+        :return:
+        """
         self.del_door(direction)
 
     def del_wall(self, direction) -> None:
+        """
+        TODO docs
+        :param direction:
+        :return:
+        """
         self.add_door(direction)
 
     @property
     def is_entrance(self) -> bool:
+        """
+        TODO docs
+        :return:
+        """
         return self.__is_entrance
 
     @is_entrance.setter
     def is_entrance(self, val: bool) -> None:
+        """
+        TODO docs
+        :param val:
+        :return:
+        """
         self.__is_entrance = val
 
     @property
     def is_exit(self) -> bool:
+        """
+        TODO docs
+        :return:
+        """
         return self.__is_exit
 
     @is_exit.setter
     def is_exit(self, val: bool) -> None:
+        """
+        TODO docs
+        :param val:
+        :return:
+        """
         self.__is_exit = val
 
     @property
     def has_pit(self) -> bool:
+        """
+        TODO docs
+        :return:
+        """
         return self.__has_pit
 
     @has_pit.setter
     def has_pit(self, val: bool) -> None:
+        """
+        TODO docs
+        :param val:
+        :return:
+        """
         self.__has_pit = val
 
     @property
     def healing_potions(self) -> int:
+        """
+        TODO docs
+        :return:
+        """
         return self.__healing_potions
 
     @healing_potions.setter
     def healing_potions(self, val: int) -> None:
+        """
+        TODO docs
+        :param val:
+        :return:
+        """
         self.__healing_potions = val
 
     @property
     def vision_potions(self) -> int:
+        """
+        TODO docs
+        :return:
+        """
         return self.__vision_potions
 
     @vision_potions.setter
     def vision_potions(self, val: int) -> None:
+        """
+        TODO docs
+        :param val:
+        :return:
+        """
         self.__vision_potions = val
 
     @property
     def pillar(self) -> str:
+        """
+        TODO docs
+        :return:
+        """
         return self.__pillar
 
     @pillar.setter
     def pillar(self, val: str) -> None:
+        """
+        TODO docs
+        :param val:
+        :return:
+        """
         self.__pillar = val
 
     @property
     def has_crumb(self) -> bool:
+        """
+        TODO docs
+        :return:
+        """
         return self.__has_crumb
 
     @has_crumb.setter
     def has_crumb(self, val: bool) -> None:
+        """
+        TODO docs
+        :param val:
+        :return:
+        """
         self.__has_crumb = val
 
     @property
     def has_hero(self) -> bool:
+        """
+        TODO docs
+        :return:
+        """
         return self.__has_hero
 
     @has_hero.setter
     def has_hero(self, val: bool) -> None:
+        """
+        TODO docs
+        :param val:
+        :return:
+        """
         self.__has_hero = val
 
     def set_room(self, percent: int = 10):
@@ -472,6 +644,10 @@ class Room:
 
     @property
     def has_mixed_contents(self) -> bool:
+        """
+        TODO docs
+        :return:
+        """
         count: int = 0
         if self.vision_potions > 0:
             count += 1
@@ -484,22 +660,40 @@ class Room:
         return count > 1
 
     def describe(self):
-        return '\n'.join([
+        """
+        TODO docs
+        :return:
+        """
+        return ''.join([f"line\n" for line in [
             f"Coords:  {self.coords}",
             f"Doors:   {self.doors_str}",
             f"Pit:     {self.has_pit}",
             f"Healing: {self.healing_potions}",
             f"Vision:  {self.vision_potions}",
             f"Pillar:  {self.pillar}",
-        ])
+        ]])
 
     def str(self, *args, **kwargs) -> str:
+        """
+        TODO docs
+        :param args:
+        :param kwargs:
+        :return:
+        """
         return str(RoomStr(self, *args, **kwargs))
 
     def __str__(self) -> str:
+        """
+        TODO docs
+        :return:
+        """
         return self.str()
 
     def __repr__(self) -> str:
+        """
+        TODO docs
+        :return:
+        """
         return RoomStr(self).room_coords()
 
 
