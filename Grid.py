@@ -5,22 +5,22 @@ Coords = tuple[int, int]
 
 class GridStr:
     """
-    TODO docs
+    Builds the string of a 2 x 2 grid
     """
     __style_default = Room.styles.default
 
     @classmethod
     def set_style_default(cls, style: Room.styles.base):
         """
-        TODO docs
-        :param style:
+        Sets the default style for the grid
+        :param style: Room styles
         :return:
         """
         cls.__style_default = style
 
     def __init__(self, grid, style=None):
         """
-        TODO docs
+        TODO: Docs
         :param grid:
         :param style:
         """
@@ -47,7 +47,7 @@ class GridStr:
 
     def __str__(self):
         """
-        TODO docs
+        Returns a string representation of the grid
         :return:
         """
         return "".join([f"{line}\n" for line in self.lines])
@@ -58,19 +58,19 @@ class Grid:
     @staticmethod
     def set_style_default(style):
         """
-        TODO docs
-        :param style:
+        Sets Grid Style
+        :param style: style (Defined elsewhere)
         :return:
         """
         GridStr.set_style_default(style=style)
 
     def __init__(self, width=2, height=2, from_grid=None, from_coords: Coords = None):
         """
-        TODO docs
-        :param width:
-        :param height:
-        :param from_grid:
-        :param from_coords:
+        Initializes Grid Class - 2 x 2 grid section within maze
+        :param width: integer - number of cells across
+        :param height: integer - number of cells down
+        :param from_grid: value of last grid, if any
+        :param from_coords: value of last coordinates, if any
         """
         if from_coords is not None:
             if not isinstance(from_coords[0], int) or not isinstance(from_coords[1], int):
@@ -94,7 +94,7 @@ class Grid:
     @property
     def width(self) -> int:
         """
-        TODO docs
+        Returns width of grid
         :return:
         """
         return self.__width
@@ -102,7 +102,7 @@ class Grid:
     @property
     def height(self) -> int:
         """
-        TODO docs
+        Returns height of grid
         :return:
         """
         return self.__height
@@ -110,7 +110,7 @@ class Grid:
     @property
     def rooms(self) -> list:
         """
-        TODO docs
+        Returns a list of rooms contained within the grid
         :return:
         """
         return self.__rooms
@@ -127,23 +127,23 @@ class Grid:
 
     def str(self, *args, **kwargs) -> str:
         """
-        TODO docs
-        :param args:
-        :param kwargs:
+        Returns contents of string representation of grid
+        :param args:arguments passed from other classes
+        :param kwargs: keyword arguments passed from other classes
         :return:
         """
         return str(GridStr(self, *args, **kwargs))
 
     def __str__(self) -> str:
         """
-        TODO docs
+        Returns string representation of grid
         :return:
         """
         return self.str()
 
     def __repr__(self) -> str:
         """
-        TODO docs
+        Returns string representation of grid in a row
         :return:
         """
         return "".join([f"{row}\n" for row in self.__rooms])
