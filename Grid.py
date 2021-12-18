@@ -4,13 +4,26 @@ Coords = tuple[int, int]
 
 
 class GridStr:
+    """
+    TODO docs
+    """
     __style_default = Room.styles.default
 
     @classmethod
     def set_style_default(cls, style: Room.styles.base):
+        """
+        TODO docs
+        :param style:
+        :return:
+        """
         cls.__style_default = style
 
     def __init__(self, grid, style=None):
+        """
+        TODO docs
+        :param grid:
+        :param style:
+        """
         self.style = self.__style_default
         if style is not None:
             self.style = style
@@ -33,6 +46,10 @@ class GridStr:
             self.lines += row_lines
 
     def __str__(self):
+        """
+        TODO docs
+        :return:
+        """
         return "".join([f"{line}\n" for line in self.lines])
 
 
@@ -40,9 +57,21 @@ class Grid:
 
     @staticmethod
     def set_style_default(style):
+        """
+        TODO docs
+        :param style:
+        :return:
+        """
         GridStr.set_style_default(style=style)
 
     def __init__(self, width=2, height=2, from_grid=None, from_coords: Coords = None):
+        """
+        TODO docs
+        :param width:
+        :param height:
+        :param from_grid:
+        :param from_coords:
+        """
         if from_coords is not None:
             if not isinstance(from_coords[0], int) or not isinstance(from_coords[1], int):
                 raise TypeError(f"from_coords must be tuple of int pair")
@@ -64,30 +93,66 @@ class Grid:
 
     @property
     def width(self) -> int:
+        """
+        TODO docs
+        :return:
+        """
         return self.__width
 
     @property
     def height(self) -> int:
+        """
+        TODO docs
+        :return:
+        """
         return self.__height
 
     @property
     def rooms(self) -> list:
+        """
+        TODO docs
+        :return:
+        """
         return self.__rooms
 
     def room(self, x: int, y: int) -> Room:
+        """
+        TODO docs
+        :param x:
+        :param y:
+        :return:
+        """
         # If coords are out-of-bounds, just let resulting IndexError bubble up
         return self.__rooms[y][x]
 
     def str(self, *args, **kwargs) -> str:
+        """
+        TODO docs
+        :param args:
+        :param kwargs:
+        :return:
+        """
         return str(GridStr(self, *args, **kwargs))
 
     def __str__(self) -> str:
+        """
+        TODO docs
+        :return:
+        """
         return self.str()
 
     def __repr__(self) -> str:
+        """
+        TODO docs
+        :return:
+        """
         return "".join([f"{row}\n" for row in self.__rooms])
 
     def empty(self):
+        """
+        TODO docs
+        :return:
+        """
         for y in range(self.height):
             for x in range(self.width):
                 r = self.room(x, y)
