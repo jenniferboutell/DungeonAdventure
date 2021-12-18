@@ -6,7 +6,7 @@ Coords = tuple[int, int]
 
 class RoomStyle:
     """
-    TODO docs
+    Sets up the display style of individual rooms
     """
     def __init__(self, corner: str = "+",
                  wall_n: str = "-----", wall_s: str = None,
@@ -18,19 +18,18 @@ class RoomStyle:
                  heroin: bool = True,
                  ):
         """
-        TODO docs
-        :param corner:
-        :param wall_n:
-        :param wall_s:
-        :param door_n:
-        :param door_s:
-        :param wall_w:
-        :param wall_e:
-        :param door_w:
-        :param door_e:
-        :param coords:
-        :param crumbs:
-        :param heroin:
+        :param corner: "+" indicating a room corner
+        :param wall_n: Series of dashes indicating a north wall
+        :param wall_s: No value - no walls needed to the South for individual rooms
+        :param door_n: "--H--" indicating a north door
+        :param door_s: No value - no doors needed to the South for individual rooms
+        :param wall_w: "|" indicating a West wall
+        :param wall_e: No value - no walls needed to the East for individual rooms
+        :param door_w: "=" indicating a West door
+        :param door_e: No value, no doors needed to the East for individual rooms
+        :param coords: Initialized as a boolean for room coordinates
+        :param crumbs: A boolean indicating whether or not room has been visited
+        :param heroin: A boolean indicating if the hero is in the current room
         """
         self.corner = corner
         # N/S walls
@@ -77,7 +76,7 @@ class RoomStyle:
     @property
     def wall_len(self) -> int:
         """
-        TODO docs
+        Gets the length of the North wall
         :return:
         """
         return len(self.wall_n)
@@ -144,11 +143,11 @@ class RoomStr:
 
     def __init__(self, _room, skip_north=None, skip_west=None, style=RoomStyles.default):
         """
-        TODO docs
-        :param _room:
-        :param skip_north:
-        :param skip_west:
-        :param style:
+        Initializes RoomStr
+        :param _room: the current room
+        :param skip_north: boolean indicating whether or not to skip North wall
+        :param skip_west: booolean indicating whether or not to skip West wall
+        :param style: The style of room to use
         """
         self.room = _room
         self.lines = []
@@ -218,7 +217,7 @@ class RoomStr:
     # reporting only coords, rather than contents, is useful for testing
     def room_coords(self) -> str:
         """
-        TODO docs
+        If the room has coordinates, return the current room coordinates. If not return default string.
         :return:
         """
         _r = self.room
@@ -229,7 +228,7 @@ class RoomStr:
 
     def room_contents(self) -> str:
         """
-        TODO docs
+        Sets the strings to display to indicate contents of current room.
         :return:
         """
         _r = self.room
@@ -252,7 +251,7 @@ class RoomStr:
 
     def __str__(self):
         """
-        TODO docs
+        Returns the string representation of a room
         :return:
         """
         return "".join([f"{line}\n" for line in self.lines])
@@ -284,19 +283,18 @@ class Room:
                  has_hero: bool = None,
                  ) -> None:
         """
-        TODO docs
-        :param grid:
-        :param coords:
-        :param is_entrance:
-        :param is_exit:
-        :param doors_mask:
-        :param doors_list:
-        :param has_pit:
-        :param healing_potions:
-        :param vision_potions:
-        :param pillar:
-        :param has_crumb:
-        :param has_hero:
+        :param grid: from grid class
+        :param coords: X, Y coordinates of room
+        :param is_entrance: boolean, indicates if the room is the map entrance
+        :param is_exit: boolean, indicates if the room is the map exit
+        :param doors_mask: indicates if the room has a door
+        :param doors_list: list of doors in the current room
+        :param has_pit: boolean, indicates if the room has a pit
+        :param healing_potions: number of healing potions
+        :param vision_potions: number of vision potions
+        :param pillar: string, one of set of pillars
+        :param has_crumb: boolean, indicates if room has been visited
+        :param has_hero: boolean, indicates if hero is present
         """
         self.__grid = grid
         self.__coords: Coords = coords
@@ -319,7 +317,7 @@ class Room:
     @property
     def grid(self):
         """
-        TODO docs
+        Gets the current grid
         :return:
         """
         return self.__grid
@@ -335,7 +333,7 @@ class Room:
     @property
     def coord_x(self) -> Optional[int]:
         """
-        TODO docs
+        Returns X coordinate of room, if any
         :return:
         """
         if self.coords is not None:
@@ -345,7 +343,7 @@ class Room:
     @property
     def coord_y(self) -> Optional[int]:
         """
-        TODO docs
+        Returns Y coordinate of room, if any
         :return:
         """
         if self.coords is not None:
@@ -391,7 +389,7 @@ class Room:
     @property
     def doors_mask(self) -> int:
         """
-        TODO docs
+        Returns number of doors in room
         :return:
         """
         return self.__doors_mask
@@ -400,8 +398,8 @@ class Room:
     @doors_mask.setter
     def doors_mask(self, doors_mask: int) -> None:
         """
-        TODO docs
-        :param doors_mask:
+        Sets doors mask
+        :param doors_mask: number of doors in room
         :return:
         """
         self.__doors_mask = doors_mask
@@ -409,7 +407,7 @@ class Room:
     @property
     def doors(self) -> list:
         """
-        TODO docs
+        Returns a list of doors by direction
         :return:
         """
         return Compass.mask2dirs(self.__doors_mask)
@@ -421,7 +419,7 @@ class Room:
     @property
     def doors_str(self) -> str:
         """
-        TODO docs
+        Returns string representation of doors
         :return:
         """
         return ','.join([d.name[0] for d in self.doors])
@@ -433,7 +431,7 @@ class Room:
 
     def has_door(self, direction) -> bool:
         """
-        TODO docs
+        Checks to see if room has door in a given direction, if so returns true
         :param direction:
         :return:
         """
@@ -484,7 +482,7 @@ class Room:
 
     def add_wall(self, direction) -> None:
         """
-        TODO docs
+        Deletes a door leaving a wall
         :param direction:
         :return:
         """
@@ -492,7 +490,7 @@ class Room:
 
     def del_wall(self, direction) -> None:
         """
-        TODO docs
+        Deletes a wall adding a door
         :param direction:
         :return:
         """
@@ -501,7 +499,7 @@ class Room:
     @property
     def is_entrance(self) -> bool:
         """
-        TODO docs
+        Returns true if there is an entrance in the room
         :return:
         """
         return self.__is_entrance
@@ -509,7 +507,7 @@ class Room:
     @is_entrance.setter
     def is_entrance(self, val: bool) -> None:
         """
-        TODO docs
+        Sets the boolean value for whether or not there is an entrance.
         :param val:
         :return:
         """
@@ -518,7 +516,7 @@ class Room:
     @property
     def is_exit(self) -> bool:
         """
-        TODO docs
+        Returns true if the room is the exit
         :return:
         """
         return self.__is_exit
@@ -526,8 +524,8 @@ class Room:
     @is_exit.setter
     def is_exit(self, val: bool) -> None:
         """
-        TODO docs
-        :param val:
+        Sets the boolean value for whether or not the room has an exit
+        :param val: True or False
         :return:
         """
         self.__is_exit = val
@@ -535,7 +533,7 @@ class Room:
     @property
     def has_pit(self) -> bool:
         """
-        TODO docs
+        Returns true if the room contains a pit
         :return:
         """
         return self.__has_pit
@@ -543,8 +541,8 @@ class Room:
     @has_pit.setter
     def has_pit(self, val: bool) -> None:
         """
-        TODO docs
-        :param val:
+        Sets the boolean value for whether or not the room contains a pit
+        :param val: True or False
         :return:
         """
         self.__has_pit = val
@@ -552,7 +550,7 @@ class Room:
     @property
     def healing_potions(self) -> int:
         """
-        TODO docs
+        Returns the number of healing potions contained within the room
         :return:
         """
         return self.__healing_potions
@@ -560,8 +558,8 @@ class Room:
     @healing_potions.setter
     def healing_potions(self, val: int) -> None:
         """
-        TODO docs
-        :param val:
+        Sets the number of healing potions contained within the room
+        :param val: Integer - number of healing potions (0 or 1)
         :return:
         """
         self.__healing_potions = val
@@ -569,7 +567,7 @@ class Room:
     @property
     def vision_potions(self) -> int:
         """
-        TODO docs
+        Returns the number of vision potions contained within the room
         :return:
         """
         return self.__vision_potions
@@ -577,8 +575,8 @@ class Room:
     @vision_potions.setter
     def vision_potions(self, val: int) -> None:
         """
-        TODO docs
-        :param val:
+        Sets the number of vision potions contained within the room
+        :param val: integer - number of healing potions (0 or 1)
         :return:
         """
         self.__vision_potions = val
@@ -586,7 +584,7 @@ class Room:
     @property
     def pillar(self) -> str:
         """
-        TODO docs
+        Returns the value of any pillar contained within the room
         :return:
         """
         return self.__pillar
@@ -594,8 +592,8 @@ class Room:
     @pillar.setter
     def pillar(self, val: str) -> None:
         """
-        TODO docs
-        :param val:
+        Sets the value of any pillar contained in the room
+        :param val: String, one of a set of pillars
         :return:
         """
         self.__pillar = val
@@ -603,7 +601,7 @@ class Room:
     @property
     def has_crumb(self) -> bool:
         """
-        TODO docs
+        Returns the boolean value for whether or not the room has been visited
         :return:
         """
         return self.__has_crumb
@@ -611,8 +609,8 @@ class Room:
     @has_crumb.setter
     def has_crumb(self, val: bool) -> None:
         """
-        TODO docs
-        :param val:
+        Sets the boolean value for whether or not the room has been visited
+        :param val: True or False
         :return:
         """
         self.__has_crumb = val
@@ -620,7 +618,7 @@ class Room:
     @property
     def has_hero(self) -> bool:
         """
-        TODO docs
+        Returns the boolean value for whether or not the hero is in the room
         :return:
         """
         return self.__has_hero
@@ -628,8 +626,8 @@ class Room:
     @has_hero.setter
     def has_hero(self, val: bool) -> None:
         """
-        TODO docs
-        :param val:
+        Sets the boolean value for whether or not the hero is in the room
+        :param val: True or False
         :return:
         """
         self.__has_hero = val
@@ -645,7 +643,7 @@ class Room:
     @property
     def has_mixed_contents(self) -> bool:
         """
-        TODO docs
+        Returns a boolean value for whether or not the room contains more than one thing
         :return:
         """
         count: int = 0
@@ -661,7 +659,7 @@ class Room:
 
     def describe(self):
         """
-        TODO docs
+        Returns a description of what is in the room
         :return:
         """
         return ''.join([f"line\n" for line in [
@@ -675,7 +673,7 @@ class Room:
 
     def str(self, *args, **kwargs) -> str:
         """
-        TODO docs
+        Returns the arguments to be contained in the string representation of the room
         :param args:
         :param kwargs:
         :return:
@@ -684,14 +682,14 @@ class Room:
 
     def __str__(self) -> str:
         """
-        TODO docs
+        Returns the string representation of the room
         :return:
         """
         return self.str()
 
     def __repr__(self) -> str:
         """
-        TODO docs
+        Returns the string representation of the room at the current coordinates
         :return:
         """
         return RoomStr(self).room_coords()
