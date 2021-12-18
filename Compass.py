@@ -7,15 +7,15 @@ DirAny = Union[DirObj, str, int]
 
 class CompassDirection:
     """
-    TODO docs
+    Defines the characteristics of each individual compass direction
     """
     def __init__(self, name: str, mask: int, vector: Coords, abbr: str = None):
         """
         TODO docs
-        :param name:
-        :param mask:
-        :param vector:
-        :param abbr:
+        :param name: String, Name of direction
+        :param mask: Integer, mask representation of direction
+        :param vector: Change in coordinates for next room in provided direction
+        :param abbr: String, abbreviation for Direction
         """
         self.__name: str = name.capitalize()
         self.__abbr: str = self.name[0]
@@ -26,7 +26,7 @@ class CompassDirection:
 
     def diag(self, dir2):
         """
-        TODO docs
+        Allows for diagonal movement with two provided directions
         :param dir2:
         :return:
         """
@@ -40,7 +40,7 @@ class CompassDirection:
     @property
     def name(self) -> str:
         """
-        TODO docs
+        Returns name of direction
         :return:
         """
         return self.__name
@@ -48,7 +48,7 @@ class CompassDirection:
     @property
     def abbr(self) -> str:
         """
-        TODO docs
+        Returns abbreviation for direction
         :return:
         """
         return self.__abbr
@@ -56,7 +56,7 @@ class CompassDirection:
     @property
     def mask(self) -> int:
         """
-        TODO docs
+        Returns direction mask
         :return:
         """
         return self.__mask
@@ -64,7 +64,7 @@ class CompassDirection:
     @property
     def vector(self) -> Coords:
         """
-        TODO docs
+        Returns direction vector
         :return:
         """
         return self.__vector
@@ -72,7 +72,7 @@ class CompassDirection:
     @property
     def vect_x(self) -> int:
         """
-        TODO docs
+        Returns direction vector on x axis
         :return:
         """
         return self.__vector[0]
@@ -80,7 +80,7 @@ class CompassDirection:
     @property
     def vect_y(self) -> int:
         """
-        TODO docs
+        Returns direction vector on y axis
         :return:
         """
         return self.__vector[1]
@@ -88,7 +88,7 @@ class CompassDirection:
     @property
     def opposite(self) -> DirObj:
         """
-        TODO docs
+        Returns opposite of direction
         :return:
         """
         return Compass.opposites.get(self)
@@ -96,7 +96,7 @@ class CompassDirection:
 
 class Compass:
     """
-    TODO docs
+    Class that sets characteristics of all directions
     """
     north = CompassDirection(name='North', mask=0b1000, vector=(0, -1))
     south = CompassDirection(name='South', mask=0b0100, vector=(0, +1))
@@ -147,7 +147,7 @@ class Compass:
     @staticmethod
     def opposite(dir: DirAny) -> Optional[CompassDirection]:
         """
-        TODO docs
+        Returns opposites of all directions
         :param dir:
         :return:
         """
@@ -233,3 +233,4 @@ if __name__ == '__main__':
     show_dirs(Compass.diags)
 
 # END
+
