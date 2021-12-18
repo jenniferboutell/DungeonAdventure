@@ -32,7 +32,6 @@ class Maze(Grid):
 
         self.__ingress: Optional[Room] = None   # entrance
         self.__egress: Optional[Room] = None    # exit
-        self.__path: list[Any] = []             # TODO known paths
 
         if map_str is not None:
             self.load_map(map_str=map_str, debug=debug)
@@ -256,10 +255,11 @@ class Maze(Grid):
                             r.healing_potions += 1
                         elif c == 'V':
                             r.vision_potions += 1
-                        elif c in ('A', 'E', 'I', 'P'):
+                        elif c in Room.pillars:
                             r.pillar = c
                         else:
                             raise ValueError(f"{c} in room {r.coords} not recognized")
+                    # TODO raise error if Entrance, Exit or Pillar present but not alone
                 char_num += wall_len
 
                 if not east_edge:
@@ -433,6 +433,7 @@ if __name__ == '__main__':
     # Generate with Recursive Division algo
     Grid.set_style_default(Room.styles.open)
     g_m = Maze(width=7, height=7)
+    g_m.empty()
     print(f"start from empty grid {g_m.width}x{g_m.height}:")
     print(g_m)
     print(f"...generate maze with Recursive Division algo:")

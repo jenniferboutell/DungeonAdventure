@@ -1,4 +1,3 @@
-import random
 from Compass import *
 
 Coords = tuple[int, int]
@@ -270,6 +269,12 @@ class Room:
       current room as well as current room (if on maze edge, less than 8)
     """
     styles = RoomStyles
+    pillars = {
+        'A': 'Abstraction',
+        'E': 'Encapsulation',
+        'I': 'Inheritance',
+        'P': 'Polymorphism',
+    }
 
     def __init__(self, grid=None, coords: Coords = None,
                  is_entrance: bool = False,
@@ -598,7 +603,10 @@ class Room:
         :param val:
         :return:
         """
-        self.__pillar = val
+        if val == '':
+            self.__pillar = None
+        else:
+            self.__pillar = val
 
     @property
     def has_crumb(self) -> bool:
@@ -634,13 +642,15 @@ class Room:
         """
         self.__has_hero = val
 
-    def set_room(self, percent: int = 10):
-        # FIXME probably get rid of this; randomized contents are hard to test.
-        # Maze load_map() is almost always what you should be using instead.
-        self.has_pit = random.randrange(100) < percent
-        self.healing_potions = random.randrange(100) < percent
-        self.vision_potions = random.randrange(100) < percent
-        # self.pillar = "I"  # FIXME Dungeon should place Pillars, not Room
+    @property
+    def is_empty(self) -> bool:
+        """
+        TODO docs
+        :return:
+        """
+        if self.has_pit or self.vision_potions or self.healing_potions or self.pillar:
+            return False
+        return True
 
     @property
     def has_mixed_contents(self) -> bool:
@@ -664,7 +674,7 @@ class Room:
         TODO docs
         :return:
         """
-        return ''.join([f"line\n" for line in [
+        return ''.join([f"{line}\n" for line in [
             f"Coords:  {self.coords}",
             f"Doors:   {self.doors_str}",
             f"Pit:     {self.has_pit}",

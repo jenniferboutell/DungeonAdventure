@@ -9,10 +9,9 @@ class DungeonAdventure:
     """
     TODO docstring
     """
-    pillars = {'A', 'E', 'I', 'P'}
-    default_hit_points_initial = 20     # start kinda weak
-    default_hit_points_max = 100        # the strength of ten (wo)men!
-    pit_damage = 10
+    default_hit_points_initial: int = 20    # start kinda weak
+    default_hit_points_max: int = 100       # the strength of ten (wo)men!
+    pit_damage: int = 10
 
     def __init__(self, map_str: str = None):
         """
@@ -310,7 +309,8 @@ class DungeonAdventure:
             print(f"Dilly Dilly! Brave Sir {self.name} has found the Exit!")
         else:
             print(f"Brave Sir {self.name} once again arrives at the exit.")
-        if self.hero.pillars == self.pillars:
+        if set(self.hero.pillars) == set(Room.pillars):
+            print("And with all of the Pillars collected. Bravo!")
             self.__continues = False
         else:
             print("But the mission is not complete! Find the remaining Pillars,")
