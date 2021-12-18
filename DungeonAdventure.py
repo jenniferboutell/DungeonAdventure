@@ -76,8 +76,14 @@ class DungeonAdventure:
         # FIXME basic validation of name
         # TODO strip() surrounding whitespace
         self.hero.name = name
-        self.menu()
-        # self.prompt()
+        print(f"Oh my. Your parents had some strange ideas, Sir {self.name}.")
+        print()  # Blank line for visual separation
+
+        print("Very well then, you have entered a Dungeon, in which there is a Maze.")
+        print("There are perilous Pits, potent Potions to purloin, and four Pillars to perceive.")
+        self.enter_room(self.room)
+        print(str(self.room))
+        self.display_menu()
 
     def finish(self):
         print(f"Brave Sir {self.name} is at The End.")
@@ -85,7 +91,7 @@ class DungeonAdventure:
         # TODO sys.exit() ...?
 
     @staticmethod
-    def menu():
+    def display_menu():
         print("\n".join(["Here are your options...",
                          "- Show (I)nventory or (M)ap",
                          "- Move (N)orth, (S)outh, (E)ast, or (W)est",
@@ -106,7 +112,7 @@ class DungeonAdventure:
             return False
 
         if option == '?':
-            self.menu()
+            self.display_menu()
 
         elif match(option, 'Q', 'quit'):
             print("Discretion is the better part of valor.")
@@ -132,17 +138,24 @@ class DungeonAdventure:
                 print("A strange game. The only winning move is not to play...")
             else:
                 print("There is a sharp pain behind your eyes, then all is revealed...")
-            print(str(self.maze))
+            print(self.maze.str(style=Room.styles.tracker))
 
         elif match(option, 'H', 'healing', 'health'):
-            print("You guzzle down the sweet, sweet elixir or life.")
-            self.hero.use_healing_potion()
+            if self.hero.healing_potions <= 0:
+                print("Did you suffer a head injury? You do not have any Healing Potions.")
+            else:
+                print("You guzzle down the sweet, sweet elixir or life.")
+                self.hero.use_healing_potion()
+                print(f"You have {self.hero.hit_points} hit points now.")
 
         elif match(option, 'V', 'vision'):
-            print("You swig the crystal clear fluid, gasp, then stare in amazement...")
-            self.hero.use_vision_potion()
-            # TODO: finish use_vision_potion method in Adventurer
-            # TODO fetch 3x3 subgrid centered at current room, and display
+            if self.hero.vision_potions <= 0:
+                print("Oblivious as always, you failed to note your lack of Vision Potions.")
+            else:
+                print("You swig the crystal clear fluid, gasp, then stare in amazement...")
+                self.hero.use_vision_potion()
+                # TODO: finish use_vision_potion method in Adventurer
+                # TODO fetch 3x3 subgrid centered at current room, and display
 
         elif Compass.dir(option):
             _dir: CompassDirection = Compass.dir(option)
@@ -170,17 +183,19 @@ class DungeonAdventure:
 
     def play(self):
         self.prelude()
+        # TODO populate maze with items
+        # TODO set self.room=Entrance (if not 0,0)
         while self.continues:
             self.prompt()
         self.finish()
 
     def find_healing_potion(self):
-        print("You find a healing potion. Use this to restore some lost hit-points.")
+        print("You find a Healing Potion. Use this to restore some lost hit-points.")
         self.room.healing_potions -= 1
         self.hero.gain_healing_potion()
 
     def find_vision_potion(self):
-        print("You find a vision potion. Use this to see surrounding rooms.")
+        print("You find a Vision Potion. Use this to see surrounding rooms.")
         self.room.vision_potions -= 1
         self.hero.gain_vision_potion()
 
@@ -194,14 +209,14 @@ class DungeonAdventure:
             self.hero.gain_pillar(self.room.pillar)
 
     def fall_into_pit(self):
-        print("You fall into a pit. The fall is merely frightening... ", end='')
+        print("You fall into a Pit. The fall is merely frightening... ", end='')
         # TODO: damage is randomly set (?)
         self.hero.take_damage(damage=self.pit_damage)
         if not self.hero.is_alive:
-            print("and the landing is fatal.")
+            print("but the landing is fatal.  x_x")
         else:
-            print("and the landing hurts.")
-            print("You now have " + str(self.hero.hit_points) + " hit-points. Ouch.")
+            print("but the landing hurts. Oof!  >_<")
+            print(f"You now have {self.hero.hit_points} hit-points.")
 
     def find_exit(self):
         if not self.room.is_exit:
@@ -219,7 +234,10 @@ class DungeonAdventure:
     def enter_room(self, room) -> None:
         """ Enter a room. Stuff happens and/or is found.
         """
+        if self.room is not None:
+            self.room.has_hero = False
         self.room = room
+        self.room.has_hero = True
         # Falling into pit occurs first. If fatal, do not find other contents.
         if room.has_pit:
             self.fall_into_pit()

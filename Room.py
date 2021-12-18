@@ -152,7 +152,7 @@ class RoomStr:
         # additional indicators
         if style.heroin and _room.has_hero:
             center += '@'
-        if style.crumbs and _room.has_crumb:
+        elif style.crumbs and _room.has_crumb:
             center += '.'
         # If style wide enough, pad with one blankspace on either side.
         # If only space for padding on one side, then pad left only.
