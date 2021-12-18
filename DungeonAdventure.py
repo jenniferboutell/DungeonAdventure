@@ -7,7 +7,7 @@ from Adventurer import Adventurer
 
 class DungeonAdventure:
     """
-    TODO docstring
+    Class that creates a game and pulls together all of the gameplay
     """
     default_hit_points_initial: int = 20    # start kinda weak
     default_hit_points_max: int = 100       # the strength of ten (wo)men!
@@ -15,8 +15,8 @@ class DungeonAdventure:
 
     def __init__(self, map_str: str = None):
         """
-        TODO dosctring
-        :param map_str:
+        Initializes DungeonAdventure Class
+        :param map_str: String of maze map
         """
         self.__maze = Dungeon(map_str=map_str)
         self.__room = self.maze.ingress
@@ -28,7 +28,7 @@ class DungeonAdventure:
     @property
     def hero(self) -> Adventurer:
         """
-        TODO docstring
+        Returns the Hero from the Adventurer class
         :return:
         """
         return self.__hero
@@ -36,8 +36,8 @@ class DungeonAdventure:
     @hero.setter
     def hero(self, hero: Adventurer) -> None:
         """
-        TODO docstring
-        :param hero:
+        Sets the Hero from the Adventurer Class
+        :param hero: object of type Adventurer, our player
         :return:
         """
         self.__hero = hero
@@ -55,7 +55,7 @@ class DungeonAdventure:
     @property
     def maze(self) -> Maze:
         """
-        TODO docs
+        Gets the maze
         :return:
         """
         return self.__maze
@@ -63,8 +63,8 @@ class DungeonAdventure:
     @maze.setter
     def maze(self, maze: Maze) -> None:
         """
-        TODO docs
-        :param maze:
+        Sets the maze for the current game
+        :param maze: current instance of Maze
         :return:
         """
         self.__maze = maze
@@ -72,7 +72,7 @@ class DungeonAdventure:
     @property
     def room(self) -> Room:
         """
-        TODO docs
+        Gets the room
         :return:
         """
         return self.__room
@@ -80,8 +80,8 @@ class DungeonAdventure:
     @room.setter
     def room(self, room: Room) -> None:
         """
-        TODO docs
-        :param room:
+        Sets the current room
+        :param room: current instance of Room
         :return:
         """
         self.__room = room
@@ -89,7 +89,7 @@ class DungeonAdventure:
     @property
     def continues(self) -> bool:
         """
-        TODO docs
+        Determines whether or not to end the game. Checks to see if hero is still alive, if they are, continue.
         :return:
         """
         if not self.hero.is_alive:
@@ -99,15 +99,15 @@ class DungeonAdventure:
     @continues.setter
     def continues(self, tallyho: bool) -> None:
         """
-        TODO docs
-        :param tallyho:
+        Returns True to continue game
+        :param tallyho: boolean value to determine continuation (True)
         :return:
         """
         self.__continues = tallyho
 
     def prelude(self):
         """
-        TODO docs
+        Silly prelude, followed by prompt for Adventurer's name, and introduction to game.
         :return:
         """
         # intro gag, no actual effect
@@ -119,8 +119,6 @@ class DungeonAdventure:
         # actual preamble
         print("Huzzah! Welcome to Dungeon Adventure!")
         name = input("What is your name, brave adventurer?\n")
-        # FIXME basic validation of name
-        # TODO strip() surrounding whitespace
         self.hero.name = name
         print(f"Oh my. Your parents had some strange ideas, Sir {self.name}.")
         print()  # Blank line for visual separation
@@ -133,17 +131,15 @@ class DungeonAdventure:
 
     def finish(self):
         """
-        TODO docs
+        Announces that the game has ended
         :return:
         """
         print(f"Brave Sir {self.name} is at The End.")
-        # TODO report what kind of ending
-        # TODO sys.exit() ...?
 
     @staticmethod
     def display_menu():
         """
-        TODO docs
+        Displays menu of game play options, excluding hidden ones.
         :return:
         """
         print("\n".join(["Here are your options...",
@@ -157,7 +153,7 @@ class DungeonAdventure:
 
     def prompt(self):
         """
-        TODO docs
+        Prompts user for game play option, and returns corresponding actions.
         :return:
         """
         print()  # empty line to visually separate from preceding stanza
@@ -242,19 +238,18 @@ class DungeonAdventure:
 
     def play(self):
         """
-        TODO docs
+        Main game play loop
         :return:
         """
         self.prelude()
-        # TODO populate maze with items
-        # TODO set self.room=Entrance (if not 0,0)
         while self.continues:
             self.prompt()
         self.finish()
 
     def find_healing_potion(self):
         """
-        TODO docs
+        Prints a string when user finds a healing potion. Subtracts potion from room, adds potion to
+        Adventurer inventory.
         :return:
         """
         print("You find a Healing Potion. Use this to restore some lost hit-points.")
@@ -263,7 +258,8 @@ class DungeonAdventure:
 
     def find_vision_potion(self):
         """
-        TODO docs
+        Prints a string when user finds a vision potion. Subtracts potion from room, adds potion to
+        Adventurer inventory.
         :return:
         """
         print("You find a Vision Potion. Use this to see surrounding rooms.")
@@ -272,7 +268,8 @@ class DungeonAdventure:
 
     def find_pillar(self, pillar: str = None):
         """
-        TODO docs
+        Prints one string when user has already encountered a pillar, and a different string when encountering it
+        for the first time. Adds new pillar to Adventurer inventory.
         :param pillar:
         :return:
         """
@@ -286,7 +283,8 @@ class DungeonAdventure:
 
     def fall_into_pit(self):
         """
-        TODO docs
+        Prints a string when the hero encounters a pit. Assigns damage to hero, checks to see if hero is still alive.
+        If still alive, print new hit points.
         :return:
         """
         print("You fall into a Pit. The fall is merely frightening... ", end='')
@@ -300,7 +298,10 @@ class DungeonAdventure:
 
     def find_exit(self):
         """
-        TODO docs
+        Checks to see if room has an exit. If room has exit:
+        Prints string and ends game if hero has collected all of the pillars
+        Prints string and continues if hero has not collected all pillars and has never found the exit before
+        Prints a different string and continues if hero has not collected all of the pillars but has seen the exit before.
         :return:
         """
         if not self.room.is_exit:
@@ -318,7 +319,11 @@ class DungeonAdventure:
 
     def enter_room(self, room) -> None:
         """ Enter a room. Stuff happens and/or is found.
-        TODO docs
+        When the hero enters a room:
+        checks to see if there is a pit, if yes, calls pit function.
+            checks to see if hero is no longer alive
+        checks to see if room has healing potion,if yes calls find healing potion function
+        checks to see if room has vision potion, if yes calls find vision potion function
         :param room:
         :return:
         """
@@ -359,17 +364,6 @@ if __name__ == "__main__":
 
     g_resp = None
     g_map_str = None
-    while g_resp is None:
-        g_resp = input("Use canned map (Y/N) ")
-        if g_resp is None:
-            continue
-        if g_resp.upper() == 'Y':
-            g_map_str = __demo_map
-            break
-        elif g_resp.upper() == 'N':
-            print("Okay, will generate cne for you.")
-            break
-
     g_game = DungeonAdventure(map_str=g_map_str)
     g_game.play()
 
