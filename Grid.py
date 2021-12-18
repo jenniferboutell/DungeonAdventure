@@ -72,9 +72,34 @@ class Grid:
         :param from_grid: value of last grid, if any
         :param from_coords: value of last coordinates, if any
         """
+        from_x: int
+        from_y: int
+        if from_grid is not None and from_coords is None:
+            raise ValueError(f"from_grid must be accompanied by from_coords")
         if from_coords is not None:
+            if from_grid is None:
+                raise ValueError(f"from_coords must be accompanied by from_grid")
             if not isinstance(from_coords[0], int) or not isinstance(from_coords[1], int):
                 raise TypeError(f"from_coords must be tuple of int pair")
+            from_x = from_coords[0]
+            from_y = from_coords[1]
+            if from_x + 1 > from_grid.width or from_y + 1 > from_grid.height:
+                raise ValueError(f"subgrid would be South and/or East of from_grid")
+            if from_x + width < 0 or from_y + height < 0:
+                raise ValueError(f"subgrid would be North and/or West from_grid")
+
+            # trim subgrid extent to what is inside parent
+            if from_x < 0:
+                width = width + from_x
+                from_x = 0
+            if from_x + width > from_grid.width:
+                width = from_grid.width - from_x
+            if from_y < 0:
+                width = width + from_x
+                from_x = 0
+            if from_y + height > from_grid.height:
+                height = from_grid.height - from_y
+
         self.__width = width
         self.__height = height
         self.__rooms = []
@@ -86,8 +111,7 @@ class Grid:
                     r = Room(grid=self, coords=(x, y))
                     row.append(r)
             else:
-                from_x = from_coords[0]
-                from_y = from_coords[1]
+                # make a subgrid that refers to subset of rooms
                 row = from_grid.rooms[from_y + y][from_x:from_x + width]
                 self.__rooms.append(row)
 
@@ -183,8 +207,16 @@ if __name__ == '__main__':
     g_h = 3
     g_x = 2
     g_y = 1
-    print(f"...and {g_w}x{g_h} subgrid with origin at parent coords ({g_x},{g_y})")
+    print(f"...and {g_w}x{g_h} subgrid with origin at parent coords ({g_x},{g_y}):")
     g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(g_x, g_y))
+    print(f"{g2}")
+    g_w = 3
+    g_h = 3
+    print(f"...and {g_w}x{g_h} subgrid, so chopped off to East:")
+    g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(g_x, g_y))
+    print(f"{g2}")
+    print(f"...and {g_w}x{g_h} subgrid, so chopped off to West:")
+    g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(-1, 0))
     print(f"{g2}")
 
     print("...and empty parent interior")
