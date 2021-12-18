@@ -6,7 +6,17 @@ DirAny = Union[DirObj, str, int]
 
 
 class CompassDirection:
+    """
+    TODO docs
+    """
     def __init__(self, name: str, mask: int, vector: Coords, abbr: str = None):
+        """
+        TODO docs
+        :param name:
+        :param mask:
+        :param vector:
+        :param abbr:
+        """
         self.__name: str = name.capitalize()
         self.__abbr: str = self.name[0]
         if abbr is not None:
@@ -15,6 +25,11 @@ class CompassDirection:
         self.__vector: Coords = vector
 
     def diag(self, dir2):
+        """
+        TODO docs
+        :param dir2:
+        :return:
+        """
         if self.mask & ~self.mask != 0 or dir2.mask & ~dir2.mask != 0:
             raise ValueError(f"can only create diagonal direction from two perpendicular directions")
         return CompassDirection(name=self.name + dir2.name,
@@ -24,34 +39,65 @@ class CompassDirection:
 
     @property
     def name(self) -> str:
+        """
+        TODO docs
+        :return:
+        """
         return self.__name
 
     @property
     def abbr(self) -> str:
+        """
+        TODO docs
+        :return:
+        """
         return self.__abbr
 
     @property
     def mask(self) -> int:
+        """
+        TODO docs
+        :return:
+        """
         return self.__mask
 
     @property
     def vector(self) -> Coords:
+        """
+        TODO docs
+        :return:
+        """
         return self.__vector
 
     @property
     def vect_x(self) -> int:
+        """
+        TODO docs
+        :return:
+        """
         return self.__vector[0]
 
     @property
     def vect_y(self) -> int:
+        """
+        TODO docs
+        :return:
+        """
         return self.__vector[1]
 
     @property
     def opposite(self) -> DirObj:
+        """
+        TODO docs
+        :return:
+        """
         return Compass.opposites.get(self)
 
 
 class Compass:
+    """
+    TODO docs
+    """
     north = CompassDirection(name='North', mask=0b1000, vector=(0, -1))
     south = CompassDirection(name='South', mask=0b0100, vector=(0, +1))
     west = CompassDirection(name='West', mask=0b0010, vector=(-1, 0))
@@ -100,6 +146,11 @@ class Compass:
 
     @staticmethod
     def opposite(dir: DirAny) -> Optional[CompassDirection]:
+        """
+        TODO docs
+        :param dir:
+        :return:
+        """
         return Compass.opposites.get(Compass.dir(dir))
 
     @staticmethod
@@ -138,7 +189,7 @@ class Compass:
 
     @staticmethod
     def dirs2mask(dirs: list[DirAny]) -> int:
-        """
+        """ TODO summary
         :param dirs: List of zero or more CompassDirection instances or string names
         :return: Integer mask representing zero to multiple directions
         """
@@ -149,7 +200,7 @@ class Compass:
 
     @staticmethod
     def mask2dirs(mask: int) -> list[CompassDirection]:
-        """
+        """ TODO summary
         :param mask: Integer mask representing zero to multiple directions.
         :return: List of CompassDirection instances
         """
