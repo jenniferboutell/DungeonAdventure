@@ -12,7 +12,8 @@ DungeonAdventure
 Initial stubs for project files and UML
 Repository set up and maintenance
 Initial joke theme
-Time Spent: 18 hours
+Most Docstrings
+Time Spent: 22 hours
 
 
 Talia Nauman:
