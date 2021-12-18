@@ -12,6 +12,7 @@ class RoomStyle:
                  door_n: str = "--H--", door_s: str = None,
                  wall_w: str = "|", wall_e: str = None,
                  door_w: str = "=", door_e: str = None,
+                 veiled: bool = False,
                  coords: bool = False,
                  crumbs: bool = False,
                  heroin: bool = True,
@@ -26,7 +27,8 @@ class RoomStyle:
         :param wall_e: No value - no walls needed to the East for individual rooms
         :param door_w: "=" indicating a West door
         :param door_e: No value, no doors needed to the East for individual rooms
-        :param coords: Initialized as a boolean for room coordinates
+        :param veiled: A boolean indicating to show only visited/seen rooms
+        :param coords: A boolean indicating to show room coordinates, not contents
         :param crumbs: A boolean indicating whether or not room has been visited
         :param heroin: A boolean indicating if the hero is in the current room
         """
@@ -62,6 +64,8 @@ class RoomStyle:
         else:
             self.coords = False
 
+        # Show only rooms with crumb
+        self.veiled = veiled
         # Extra mark if hero present or, if not (or option disabled),
         # whether hero has visited/seen room
         if self.wall_len >= 2:
@@ -92,6 +96,7 @@ class RoomStyles:
                     wall_n="*****", wall_w="*",
                     door_n=" --- ", door_w="|")
     tracker = RoomStyle(heroin=True, crumbs=True)
+    veiled = RoomStyle(heroin=True, veiled=True)
     default = base
 
 
@@ -174,16 +179,22 @@ class RoomStr:
                 line += style.wall_w
 
         # center: contents and/or attributes
-        if style.coords:
-            # NOTE no attempt made to deal len(room_coords) > style.wall_len
-            center = self.room_coords()
+        if style.veiled and not _room.has_crumb:
+            if style.wall_len < 3:
+                center = ''
+            else:
+                center = '?' * style.wall_len
         else:
-            center = self.room_contents()
-        # additional indicators
-        if style.heroin and _room.has_hero:
-            center += '@'
-        elif style.crumbs and _room.has_crumb:
-            center += '.'
+            if style.coords:
+                # NOTE no attempt made to deal len(room_coords) > style.wall_len
+                center = self.room_coords()
+            else:
+                center = self.room_contents()
+            # additional indicators
+            if style.heroin and _room.has_hero:
+                center += '@'
+            elif style.crumbs and _room.has_crumb:
+                center += '.'
         # If style wide enough, pad with one blankspace on either side.
         # If only space for padding on one side, then pad left only.
         if style.wall_len >= 3:
@@ -196,7 +207,9 @@ class RoomStr:
         line += center
 
         # east side
-        if _room.has_door(East):
+        if style.veiled and self.is_veiled_e(_room):
+            line += '?'
+        elif _room.has_door(East):
             line += style.door_e
         else:
             line += style.wall_e
@@ -206,12 +219,36 @@ class RoomStr:
         line = ""
         if not skip_west:
             line += style.corner
-        if _room.has_door(South):
+        if style.veiled and self.is_veiled_s(_room):
+            line += '?' * style.wall_len
+        elif _room.has_door(South):
             line += style.door_s
         else:
             line += style.wall_s
         line += style.corner
         self.lines.append(line)
+
+    @staticmethod
+    def is_veiled_s(room) -> bool:
+        _r2 = room.neighbor(South)
+        if _r2 is None:
+            return False
+        if room.has_crumb:
+            return False
+        if _r2.has_crumb:
+            return False
+        return True
+
+    @staticmethod
+    def is_veiled_e(room) -> bool:
+        _r2 = room.neighbor(East)
+        if _r2 is None:
+            return False
+        if room.has_crumb:
+            return False
+        if _r2.has_crumb:
+            return False
+        return True
 
     # reporting only coords, rather than contents, is useful for testing
     def room_coords(self) -> str:

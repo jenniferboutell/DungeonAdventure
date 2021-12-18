@@ -180,8 +180,8 @@ class DungeonAdventure:
             self.hero.display_inventory()
 
         elif match(option, 'M', 'map'):
-            print("Drat. Your map appears to have smeared and is now unreadable.")
-            # TODO show map of visited/seen rooms
+            print("I'm the Map! I'm the Map! I'M! THE! MAP!!!")
+            print(f"{self.maze.str(style=Room.styles.veiled)}")
 
         elif match(option, '@', 'describe'):
             # Hidden option! Describe current room

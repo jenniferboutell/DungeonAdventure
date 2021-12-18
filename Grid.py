@@ -72,8 +72,8 @@ class Grid:
         :param from_grid: value of last grid, if any
         :param from_coords: value of last coordinates, if any
         """
-        from_x: int
-        from_y: int
+        from_x: int = 0
+        from_y: int = 0
         if from_grid is not None and from_coords is None:
             raise ValueError(f"from_grid must be accompanied by from_coords")
         if from_coords is not None:
@@ -95,8 +95,8 @@ class Grid:
             if from_x + width > from_grid.width:
                 width = from_grid.width - from_x
             if from_y < 0:
-                width = width + from_x
-                from_x = 0
+                height = height + from_y
+                from_y = 0
             if from_y + height > from_grid.height:
                 height = from_grid.height - from_y
 
@@ -210,13 +210,23 @@ if __name__ == '__main__':
     print(f"...and {g_w}x{g_h} subgrid with origin at parent coords ({g_x},{g_y}):")
     g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(g_x, g_y))
     print(f"{g2}")
+
+    print(f"...and {g_w}x{g_h} subgrids, trimmed because overlap edges.")
     g_w = 3
     g_h = 3
-    print(f"...and {g_w}x{g_h} subgrid, so chopped off to East:")
-    g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(g_x, g_y))
+    g_x = g1.width - 2
+    g_y = g1.height - 2
+    print("...trimmed to North:")
+    g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(1, -1))
     print(f"{g2}")
-    print(f"...and {g_w}x{g_h} subgrid, so chopped off to West:")
-    g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(-1, 0))
+    print("...trimmed to South:")
+    g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(1, g_y))
+    print(f"{g2}")
+    print("...trimmed to East:")
+    g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(g_x, 1))
+    print(f"{g2}")
+    print(f"...trimmed to West:")
+    g2 = Grid(g_w, g_h, from_grid=g1, from_coords=(-1, 1))
     print(f"{g2}")
 
     print("...and empty parent interior")
