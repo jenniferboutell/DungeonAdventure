@@ -10,11 +10,21 @@ Coords = tuple[int, int]
 
 
 class Maze(Grid):
+    """
+    TODO
+    """
 
     def __init__(self,
                  width: int = 4, height: int = 4,
                  map_str: str = None,
                  debug: bool = False) -> None:
+        """
+        TODO
+        :param width:
+        :param height:
+        :param map_str:
+        :param debug:
+        """
         if map_str is not None:
             width, height = Maze.parse_map(map_str=map_str, debug=debug)
         super().__init__(width=width, height=height)
@@ -22,10 +32,16 @@ class Maze(Grid):
             self.load_map(map_str=map_str, debug=debug)
         else:
             self.empty()
+            self.generate()
         # Initialization of other fields deferred to separate methods.
         self.__path: list[Any] = []
 
     def load_map(self, **kwargs):
+        """
+        TODO
+        :param kwargs:
+        :return:
+        """
         Maze.parse_map(grid=self, **kwargs)
 
     @staticmethod
@@ -78,6 +94,7 @@ class Maze(Grid):
         char_num = 0
 
         def dbg_parse(*args, **kwargs):
+            """ Nested utility function. """
             if debug:
                 print(f"L{line_num}C{char_num}: ", *args, **kwargs)
 
@@ -227,12 +244,17 @@ class Maze(Grid):
 
     @staticmethod
     def __clear_screen():
+        """
+        TODO
+        :return:
+        """
         print("clear screen...")
         print('\033c', end='')
 
     def __rec_div(self, origin: Coords = None, dimens: Coords = None,
                   debug: bool = False, animate: bool = False) -> None:
         """ One round of recursive division.
+        TODO
         :param origin:
         :param dimens:
         :return: None
@@ -295,6 +317,12 @@ class Maze(Grid):
         self.generate_rec_div(*args, **kwargs)
 
     def can_move(self, from_room: Room, direction: CompassDirection) -> tuple[bool, Optional[Room]]:
+        """
+        TODO
+        :param from_room:
+        :param direction:
+        :return:
+        """
         # print(f"can_move from_room...\n{from_room}")
         if not from_room.has_door(direction):
             return False, None

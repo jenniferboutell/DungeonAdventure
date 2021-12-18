@@ -6,12 +6,19 @@ from Adventurer import Adventurer
 
 
 class DungeonAdventure:
+    """
+    TODO docstring
+    """
     pillars = {'A', 'E', 'I', 'P'}
     default_hit_points_initial = 20     # start kinda weak
     default_hit_points_max = 100        # the strength of ten (wo)men!
     pit_damage = 10
 
     def __init__(self, map_str: str = None):
+        """
+        TODO dosctring
+        :param map_str:
+        """
         self.__maze = Maze(map_str=map_str)
         # TODO populate maze with entrance/exit, items
         self.__room = self.maze.room(0, 0)  # FIXME set to entrance
@@ -22,10 +29,19 @@ class DungeonAdventure:
 
     @property
     def hero(self) -> Adventurer:
+        """
+        TODO docstring
+        :return:
+        """
         return self.__hero
 
     @hero.setter
     def hero(self, hero: Adventurer) -> None:
+        """
+        TODO docstring
+        :param hero:
+        :return:
+        """
         self.__hero = hero
 
     @property
@@ -34,36 +50,68 @@ class DungeonAdventure:
         Not actually a property of DungeonAdventure class itself.
         But used so often in dialogue, covenient to shorten the path to it.
         Only set once though, so corresponding setter not really warranted.
+        :return string
         """
         return self.hero.name
 
     @property
     def maze(self) -> Maze:
+        """
+        TODO docs
+        :return:
+        """
         return self.__maze
 
     @maze.setter
     def maze(self, maze: Maze) -> None:
+        """
+        TODO docs
+        :param maze:
+        :return:
+        """
         self.__maze = maze
 
     @property
     def room(self) -> Room:
+        """
+        TODO docs
+        :return:
+        """
         return self.__room
 
     @room.setter
     def room(self, room: Room) -> None:
+        """
+        TODO docs
+        :param room:
+        :return:
+        """
         self.__room = room
 
     @property
     def continues(self) -> bool:
+        """
+        TODO docs
+        :return:
+        """
         if not self.hero.is_alive:
             return False
         return self.__continues
 
     @continues.setter
     def continues(self, tallyho: bool) -> None:
+        """
+        TODO docs
+        :param tallyho:
+        :return:
+        """
         self.__continues = tallyho
 
     def prelude(self):
+        """
+        TODO docs
+        :return:
+        """
         # intro gag, no actual effect
         option = input("Shall we play a game? (Y/N)\n")
         if option.upper() in ("N", 'NO'):
@@ -86,12 +134,20 @@ class DungeonAdventure:
         self.display_menu()
 
     def finish(self):
+        """
+        TODO docs
+        :return:
+        """
         print(f"Brave Sir {self.name} is at The End.")
         # TODO report what kind of ending
         # TODO sys.exit() ...?
 
     @staticmethod
     def display_menu():
+        """
+        TODO docs
+        :return:
+        """
         print("\n".join(["Here are your options...",
                          "- Show (I)nventory or (M)ap",
                          "- Move (N)orth, (S)outh, (E)ast, or (W)est",
@@ -102,10 +158,15 @@ class DungeonAdventure:
         # (*) show full map, (@) describe current room
 
     def prompt(self):
+        """
+        TODO docs
+        :return:
+        """
         print()  # empty line to visually separate from preceding stanza
         option = input(f"What would you like to do, brave Sir {self.name}?\n")
 
         def match(got: str, *wants) -> bool:
+            """ Nested utility function. """
             for want in wants:
                 if got.lower() == want.lower():
                     return True
@@ -182,6 +243,10 @@ class DungeonAdventure:
             # no-op
 
     def play(self):
+        """
+        TODO docs
+        :return:
+        """
         self.prelude()
         # TODO populate maze with items
         # TODO set self.room=Entrance (if not 0,0)
@@ -190,16 +255,29 @@ class DungeonAdventure:
         self.finish()
 
     def find_healing_potion(self):
+        """
+        TODO docs
+        :return:
+        """
         print("You find a Healing Potion. Use this to restore some lost hit-points.")
         self.room.healing_potions -= 1
         self.hero.gain_healing_potion()
 
     def find_vision_potion(self):
+        """
+        TODO docs
+        :return:
+        """
         print("You find a Vision Potion. Use this to see surrounding rooms.")
         self.room.vision_potions -= 1
         self.hero.gain_vision_potion()
 
     def find_pillar(self, pillar: str = None):
+        """
+        TODO docs
+        :param pillar:
+        :return:
+        """
         if pillar is None and self.room.pillar is not None:
             pillar = self.room.pillar
         if self.hero.has_pillar(pillar):
@@ -209,6 +287,10 @@ class DungeonAdventure:
             self.hero.gain_pillar(self.room.pillar)
 
     def fall_into_pit(self):
+        """
+        TODO docs
+        :return:
+        """
         print("You fall into a Pit. The fall is merely frightening... ", end='')
         # TODO: damage is randomly set (?)
         self.hero.take_damage(damage=self.pit_damage)
@@ -219,6 +301,10 @@ class DungeonAdventure:
             print(f"You now have {self.hero.hit_points} hit-points.")
 
     def find_exit(self):
+        """
+        TODO docs
+        :return:
+        """
         if not self.room.is_exit:
             return
         if not self.room.has_crumb:
@@ -233,6 +319,9 @@ class DungeonAdventure:
 
     def enter_room(self, room) -> None:
         """ Enter a room. Stuff happens and/or is found.
+        TODO docs
+        :param room:
+        :return:
         """
         if self.room is not None:
             self.room.has_hero = False
@@ -258,9 +347,7 @@ class DungeonAdventure:
         room.has_crumb = True
 
 
-if __name__ == "__main__":
-
-    g_map_str = """
+__demo_map = """
 # This is my fine dungeon
 +-----+-----+-----+
 | i   |     = O   |
@@ -268,6 +355,21 @@ if __name__ == "__main__":
 | P   = XV  = HH  |
 +-----+-----+-----+
 """
+
+if __name__ == "__main__":
+
+    g_resp = None
+    g_map_str = None
+    while g_resp is None:
+        g_resp = input("Use canned map (Y/N) ")
+        if g_resp is None:
+            continue
+        if g_resp.upper() == 'Y':
+            g_map_str = __demo_map
+            break
+        elif g_resp.upper() == 'N':
+            print("Okay, will generate cne for you.")
+            break
 
     g_game = DungeonAdventure(map_str=g_map_str)
     g_game.play()
