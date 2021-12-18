@@ -27,14 +27,52 @@ class Maze(Grid):
         """
         if map_str is not None:
             width, height = Maze.parse_map(map_str=map_str, debug=debug)
+
         super().__init__(width=width, height=height)
+
+        self.__ingress: Optional[Room] = None   # entrance
+        self.__egress: Optional[Room] = None    # exit
+        self.__path: list[Any] = []             # TODO known paths
+
         if map_str is not None:
             self.load_map(map_str=map_str, debug=debug)
         else:
             self.empty()
             self.generate()
-        # Initialization of other fields deferred to separate methods.
-        self.__path: list[Any] = []
+
+    @property
+    def ingress(self) -> Optional[Room]:
+        """
+        TODO docs
+        :return:
+        """
+        return self.__ingress
+
+    @ingress.setter
+    def ingress(self, room: Room) -> None:
+        """
+        TODO docs
+        :param room:
+        :return:
+        """
+        self.__ingress = room
+
+    @property
+    def egress(self) -> Optional[Room]:
+        """
+        TODO docs
+        :return:
+        """
+        return self.__egress
+
+    @egress.setter
+    def egress(self, room: Room) -> None:
+        """
+        TODO docs
+        :param room:
+        :return:
+        """
+        self.__egress = room
 
     def load_map(self, **kwargs):
         """
