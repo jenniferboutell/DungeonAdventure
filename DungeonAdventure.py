@@ -6,11 +6,18 @@ from Adventurer import Adventurer
 
 
 class DungeonAdventure:
+    pillars = {'A', 'E', 'I', 'P'}
+    default_hit_points_initial = 20     # start kinda weak
+    default_hit_points_max = 100        # the strength of ten (wo)men!
+    pit_damage = 10
 
     def __init__(self, map_str: str = None):
-        self.__hero = Adventurer(self)
         self.__maze = Maze(map_str=map_str)
-        self.__room = self.__maze.room(0, 0)
+        # TODO populate maze with entrance/exit, items
+        self.__room = self.maze.room(0, 0)  # FIXME set to entrance
+        self.__hero = Adventurer(game=self,
+                                 hit_points=self.default_hit_points_initial,
+                                 hit_points_max=self.default_hit_points_max)
         self.__continues: bool = True
 
     @property
@@ -48,7 +55,8 @@ class DungeonAdventure:
 
     @property
     def continues(self) -> bool:
-        # TODO check for other failing conditions? e.g. hero.hit_points <= 0
+        if not self.hero.is_alive:
+            return False
         return self.__continues
 
     @continues.setter
@@ -107,7 +115,7 @@ class DungeonAdventure:
 
         elif match(option, 'I', 'inventory'):
             print("Thine Bag of Holding doth weigh upon you most ponderously...")
-            self.__hero.display_inventory()
+            self.hero.display_inventory()
 
         elif match(option, 'M', 'map'):
             print("Drat. Your map appears to have smeared and is now unreadable.")
@@ -128,38 +136,30 @@ class DungeonAdventure:
 
         elif match(option, 'H', 'healing', 'health'):
             print("You guzzle down the sweet, sweet elixir or life.")
-            self.__hero.use_healing_potion()
+            self.hero.use_healing_potion()
 
         elif match(option, 'V', 'vision'):
             print("You swig the crystal clear fluid, gasp, then stare in amazement...")
-            self.__hero.use_vision_potion()
+            self.hero.use_vision_potion()
             # TODO: finish use_vision_potion method in Adventurer
             # TODO fetch 3x3 subgrid centered at current room, and display
 
         elif Compass.dir(option):
             _dir: CompassDirection = Compass.dir(option)
-            # Try going that direction
-            # TODO was this supposed to go into self.hero.move(_dir)...?
-            # If so, move() returns False if cannot traverse that direction.
-            next_room = self.__room.neighbor(option)
-            if next_room is None:
-                print(f"You take a step to the {_dir.name}... but are thwarted.")
+            print(f"You take a step to the {_dir.name}... ", end='')
+            can_move, next_room = self.maze.can_move(self.room, direction=_dir)
+            next_room = self.room.neighbor(option)
+            if not can_move:
+                print("but are thwarted.")
                 print(f"Brave Sir {self.name} didst stare defiantly at his shoes.")
                 return
-            print(f"You bound jauntily to the {_dir.name}...")
+            if next_room is None:
+                print("but discover there is void on the other side.")
+                print(f"Brave Sir {self.name} steps back from the precipice.")
+                return
+            print("sailing gracefully into the next room.")
             print(next_room)
-            self.room = next_room
-            # self.room.set_room()  # FIXME nope, rely on loaded map!
-            if self.room.healing_potions:
-                self.find_healing_potion()
-            if self.room.vision_potions:
-                self.find_vision_potion()
-            if self.room.has_pit:
-                self.fall_into_pit()
-            if self.hero.hit_points <= 0:
-                self.continues = False
-            if self.room.is_exit:
-                self.find_exit()  # TODO: add pillar logic
+            self.enter_room(next_room)
 
         else:
             print()  # empty line for visual separation
@@ -176,22 +176,68 @@ class DungeonAdventure:
 
     def find_healing_potion(self):
         print("You find a healing potion. Use this to restore some lost hit-points.")
-        self.__hero.gain_healing_potion()
+        self.room.healing_potions -= 1
+        self.hero.gain_healing_potion()
 
     def find_vision_potion(self):
         print("You find a vision potion. Use this to see surrounding rooms.")
-        self.__hero.gain_vision_potion()
+        self.room.vision_potions -= 1
+        self.hero.gain_vision_potion()
+
+    def find_pillar(self, pillar: str = None):
+        if pillar is None and self.room.pillar is not None:
+            pillar = self.room.pillar
+        if self.hero.has_pillar(pillar):
+            print(f"Oh look, the Pillar '{pillar}'. Already seen it. So boring.")
+        else:
+            print(f"You find the Pillar '{pillar}'. Good job, you!")
+            self.hero.gain_pillar(self.room.pillar)
 
     def fall_into_pit(self):
-        print("You fall into a pit. The fall is merely frightening; the landing hurts.")
-        self.__hero.take_damage()
-        print("You now have " + str(self.__hero.hit_points) + " hit-points. Ouch.")
-        # TODO: fix adventurer so that damage is randomly set, and hit points statement set there as well.
+        print("You fall into a pit. The fall is merely frightening... ", end='')
+        # TODO: damage is randomly set (?)
+        self.hero.take_damage(damage=self.pit_damage)
+        if not self.hero.is_alive:
+            print("and the landing is fatal.")
+        else:
+            print("and the landing hurts.")
+            print("You now have " + str(self.hero.hit_points) + " hit-points. Ouch.")
 
     def find_exit(self):
-        # TODO: add this logic: if current room is exit
-        print("Dilly Dilly! Brave Brave Brave Brave Sir " + self.name + " has found the exit.")
-        self.__continues = False
+        if not self.room.is_exit:
+            return
+        if not self.room.has_crumb:
+            print(f"Dilly Dilly! Brave Sir {self.name} has found the Exit!")
+        else:
+            print(f"Brave Sir {self.name} once again arrives at the exit.")
+        if self.hero.pillars == self.pillars:
+            self.__continues = False
+        else:
+            print("But the mission is not complete! Find the remaining Pillars,")
+            print("then return here to the Exit... if you can!")
+
+    def enter_room(self, room) -> None:
+        """ Enter a room. Stuff happens and/or is found.
+        """
+        self.room = room
+        # Falling into pit occurs first. If fatal, do not find other contents.
+        if room.has_pit:
+            self.fall_into_pit()
+        if not self.hero.is_alive:
+            return
+        # Collect items
+        if room.healing_potions:
+            self.find_healing_potion()
+        if room.vision_potions:
+            self.find_vision_potion()
+        # Pillars and Exit are each supposed to be sole item in room, if present.
+        # Ergo, cannot have both, so order of the following does not matter.
+        if room.pillar:
+            self.find_pillar()
+        if room.is_exit:
+            self.find_exit()
+        # Drop breadcrumb AFTER finding Pillar or Exit, so announce differently.
+        room.has_crumb = True
 
 
 if __name__ == "__main__":

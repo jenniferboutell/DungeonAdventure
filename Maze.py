@@ -294,6 +294,15 @@ class Maze(Grid):
         """
         self.generate_rec_div(*args, **kwargs)
 
+    def can_move(self, from_room: Room, direction: CompassDirection) -> tuple[bool, Optional[Room]]:
+        # print(f"can_move from_room...\n{from_room}")
+        if not from_room.has_door(direction):
+            return False, None
+        next_room = from_room.neighbor(direction)
+        if next_room is None:
+            return True, None
+        return True, next_room
+
 
 if __name__ == '__main__':
     print("Greetings from Maze!\n")

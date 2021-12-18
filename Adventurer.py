@@ -1,16 +1,19 @@
-from Room import Room
-#from DungeonAdventure import *
+# from Room import Room
+# from DungeonAdventure import *
 
 
 class Adventurer:
+    default_hit_points_initial = 20
+    default_hit_points_max = 100
 
-    def __init__(self, game, name: str = None, hit_points: int = 20):
+    def __init__(self, game=None, name: str = None, hit_points: int = None, hit_points_max: int = None):
         self.__game = game
         self.__name: str = name
         self.__hit_points: int = hit_points
+        self.__hit_points_max: int = hit_points_max
         self.__healing_potions: int = 0
         self.__vision_potions: int = 0
-        self.__pillars: set = set()
+        self.__pillars: set = set()  # empty
 
     @property
     def name(self) -> str:
@@ -25,20 +28,53 @@ class Adventurer:
         return self.__game
 
     @property
-    def hit_points(self):
+    def hit_points(self) -> int:
         return self.__hit_points
 
+    @hit_points.setter
+    def hit_points(self, val: int) -> None:
+        if val is not None:
+            self.__hit_points = val
+        elif self.game is not None:
+            self.__hit_points = self.game.default_hit_points_initial
+
     @property
-    def healing_potions(self):
+    def hit_points_max(self) -> int:
+        return self.__hit_points_max
+
+    @hit_points_max.setter
+    def hit_points_max(self, val: int) -> None:
+        if val is not None:
+            self.__hit_points_max = val
+        elif self.game is not None:
+            self.__hit_points_max = self.game.default_hit_points_max
+
+    @property
+    def is_alive(self) -> bool:
+        return self.hit_points > 0
+
+    @property
+    def healing_potions(self) -> int:
         return self.__healing_potions
 
-    @property
-    def vision_potions(self):
-        return self.__vision_potions
+    @healing_potions.setter
+    def healing_potions(self, val: int) -> None:
+        self.__healing_potions = val
 
     @property
-    def pillars(self):
+    def vision_potions(self) -> int:
+        return self.__vision_potions
+
+    @vision_potions.setter
+    def vision_potions(self, val: int) -> None:
+        self.__vision_potions = val
+
+    @property
+    def pillars(self) -> set:
         return self.__pillars
+
+    def has_pillar(self, pillar):
+        return bool(pillar in self.pillars)
 
     def display_inventory(self):
         # Keeps a list of items in inventory
@@ -51,14 +87,11 @@ class Adventurer:
         print(f"Adventurer: {self.__name}")
         print(f"Health: {self.__hit_points}")
 
-    def take_damage(self, damage: int = 10):
+    def take_damage(self, damage: int = 1):
         self.__hit_points -= damage
         if self.__hit_points <= 0:
-            self.dissolve()
-        # FIXME if down to zero, dies
-
-    def dissolve(self):
-        print("Your molecules have dissolved and become one with the universe.")
+            self.__hit_points = 0
+            self.game.continues = False
 
     def gain_healing_potion(self,):
         self.__healing_potions += 1
@@ -69,8 +102,8 @@ class Adventurer:
             return
         self.__healing_potions -= 1
         self.__hit_points += hit_points
-        if self.__hit_points > 100:
-            self.__hit_points = 100
+        if self.__hit_points > self.hit_points_max:
+            self.__hit_points = self.hit_points_max
         print("You have " + str(self.__hit_points) + " hit points now.")
         # FIXME cannot exceed some max threshold
 
@@ -84,14 +117,5 @@ class Adventurer:
 
     def gain_pillar(self, pillar_name):
         self.__pillars.add(pillar_name)
-
-    def move(self, direction) -> bool:
-        """ Try to step in a a direction.
-        Return True if successful, False if cannot.
-        """
-
-        # TODO traverse to adjacent room hand off to Game for this.
-        # return self.__game.traverse(direction)
-        return True
 
 # END
