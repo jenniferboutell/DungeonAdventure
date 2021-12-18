@@ -6,16 +6,12 @@ from random import randrange
 
 class Dungeon(Maze):
     """
-    TODO docs
+    Thin subclass Maze that handles autofilling of items, etc.
     """
     item_chance: int = 10  # percent chance given item type appears in room
 
     def __init__(self, *args, **kwargs):
-        """
-        TODO docs
-        :param args:
-        :param kwargs:
-        """
+        """ Create a Dungeon. Same usage as Maze constructor. """
         super().__init__(*args, **kwargs)
         self.validate_in_out()
         self.add_pillars()
