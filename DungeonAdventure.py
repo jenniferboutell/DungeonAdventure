@@ -1,8 +1,8 @@
 from Compass import Compass, CompassDirection
 from Room import Room
 from Maze import Maze
+from Dungeon import Dungeon
 from Adventurer import Adventurer
-# from random import randrange
 
 
 class DungeonAdventure:
@@ -19,9 +19,8 @@ class DungeonAdventure:
         TODO dosctring
         :param map_str:
         """
-        self.__maze = Maze(map_str=map_str)
-        # TODO populate maze with entrance/exit, items
-        self.__room = self.maze.room(0, 0)  # FIXME set to entrance
+        self.__maze = Dungeon(map_str=map_str)
+        self.__room = self.maze.ingress
         self.__hero = Adventurer(game=self,
                                  hit_points=self.default_hit_points_initial,
                                  hit_points_max=self.default_hit_points_max)

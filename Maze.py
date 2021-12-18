@@ -347,12 +347,25 @@ class Maze(Grid):
         """
         self.__rec_div((0, 0), (self.width, self.height), *args, **kwargs)
 
+        # Set ingress and egress.
+        # Since this algo produces result wherein every cell is guaranteed reachable,
+        # can just pick random cells on the outer grid edge as ingress and egress.
+        # To easily avoid cells that are too close, select from opposite grid edges.
+        if randrange(2) % 1:
+            self.ingress = self.room(randrange(self.width), 0)
+            self.egress = self.room(randrange(self.width), self.height-1)
+        else:
+            self.ingress = self.room(0, randrange(self.height))
+            self.egress = self.room(self.height-1, randrange(self.height))
+
     def generate(self, *args, **kwargs):
         """ Generate maze.
         For now, only has one algorithm. But could implement more...
         :return: None
         """
         self.generate_rec_div(*args, **kwargs)
+        self.ingress.is_entrance = True
+        self.egress.is_exit = True
 
     def can_move(self, from_room: Room, direction: CompassDirection) -> tuple[bool, Optional[Room]]:
         """
