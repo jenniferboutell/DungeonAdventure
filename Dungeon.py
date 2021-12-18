@@ -17,7 +17,7 @@ class Dungeon(Maze):
         super().__init__(*args, **kwargs)
 
         # TODO confirm has Entrance and Exit; either imported map
-        # or Maze.generate() should have taken carev to include those.
+        # or Maze.generate() should have taken care to include those.
 
         # TODO check for pillars, add ANY that are missing
 

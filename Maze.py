@@ -81,6 +81,14 @@ class Maze(Grid):
         :return:
         """
         Maze.parse_map(grid=self, **kwargs)
+        for row in self.rooms:
+            for room in row:
+                if room.is_entrance:
+                    self.ingress = room
+                if room.is_exit:
+                    self.egress = room
+                # TODO raise error if multiple found?
+        # TODO raise error if either is missing
 
     @staticmethod
     def parse_map(map_str: str = None, grid=None,
