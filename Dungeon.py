@@ -1,11 +1,17 @@
-from Room import Room
+from Maze import Maze
 
 
-class Dungeon:
+class Dungeon(Maze):
+    """
+    TODO docs
+    """
 
-    def __init__(self, maze):
-        self.maze = []
+    def __init__(self, *args, **kwargs):
+        """
+        TODO docs
+        :param args:
+        :param kwargs:
+        """
+        super().__init__(*args, **kwargs)
 
-    def __str__(self):
-        pass
-
+# END
