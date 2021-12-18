@@ -1,8 +1,3 @@
-from typing import Optional
-# from Room import Room
-# from DungeonAdventure import *
-
-
 class Adventurer:
     """
     Our brave hero. Sets up and updates game player, their inventory, potions and hit points.
@@ -213,7 +208,7 @@ class Adventurer:
         if self.vision_potions <= 0:
             return -1
         self.vision_potions -= 1
-        # TODO adjust visible rooms (call a method in game for this)
+        self.game.extend_vision()
         return self.vision_potions
 
     def gain_pillar(self, pillar_name):
@@ -225,4 +220,3 @@ class Adventurer:
         self.pillars.add(pillar_name)
 
 # END
-

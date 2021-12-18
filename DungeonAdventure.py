@@ -1,5 +1,6 @@
 from Compass import Compass, CompassDirection
 from Room import Room
+from Grid import Grid
 from Maze import Maze
 from Dungeon import Dungeon
 from Adventurer import Adventurer
@@ -209,8 +210,6 @@ class DungeonAdventure:
             else:
                 print("You swig the crystal clear fluid, gasp, then stare in amazement...")
                 self.hero.use_vision_potion()
-                # TODO: finish use_vision_potion method in Adventurer
-                # TODO fetch 3x3 subgrid centered at current room, and display
 
         elif Compass.dir(option):
             _dir: CompassDirection = Compass.dir(option)
@@ -265,6 +264,14 @@ class DungeonAdventure:
         print("You find a Vision Potion. Use this to see surrounding rooms.")
         self.room.vision_potions -= 1
         self.hero.gain_vision_potion()
+
+    def extend_vision(self):
+        from_coords = (self.room.coord_x -1, self.room.coord_y - 1)
+        extent = Grid(3, 3, from_grid=self.maze, from_coords=from_coords)
+        for row in extent.rooms:
+            for room in row:
+                room.has_crumb = True
+        print(f"{extent}")
 
     def find_pillar(self, pillar: str = None):
         """
