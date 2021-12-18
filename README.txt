@@ -24,6 +24,8 @@ Possible Shortcomings:
 No GUI, but it's a fun game
 
 Other information useful in grading:
+Note: Maze Algorithm will only generate a passable maze.
+
 JP was the glue that held this all together. We added a third member of the team late in the game.
 The maze generation wikipedia article on Maze Generation Algorithms provided a plain English description of how to
 do the maze generation, other than that the maze generation is all from the mind of JP.
