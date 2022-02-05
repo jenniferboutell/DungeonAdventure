@@ -1,6 +1,6 @@
 # import pytest
-from grid import GridStr
-from maze import Maze
+from Room import Room
+from Maze import Maze
 
 g_dbg_enabled = False
 
@@ -14,12 +14,20 @@ def test_maze_default():
     # Default 4x4 grid, no doors yet
     dbg_print(f"\nDefault 4x4 maze...")
     m = Maze(width=4, height=4)
+    # Maze auto-generates by default, so nuke that.
+    # Thus, every potential interior wall becomes a door.
+    m.empty()
     dbg_print(m)
-    assert str(m) == """
-[0,0, 1,0, 2,0, 3,0]
-[0,1, 1,1, 2,1, 3,1]
-[0,2, 1,2, 2,2, 3,2]
-[0,3, 1,3, 2,3, 3,3]
+    assert m.str(style=Room.styles.coords) == """
++-----+-----+-----+-----+
+| 0,0 = 1,0 = 2,0 = 3,0 |
++--H--+--H--+--H--+--H--+
+| 0,1 = 1,1 = 2,1 = 3,1 |
++--H--+--H--+--H--+--H--+
+| 0,2 = 1,2 = 2,2 = 3,2 |
++--H--+--H--+--H--+--H--+
+| 0,3 = 1,3 = 2,3 = 3,3 |
++-----+-----+-----+-----+
 """.lstrip()
 
 
@@ -55,18 +63,12 @@ def test_maze_parse():
     m = Maze(map_str=map_str)
     dbg_print(f"maze width={m.width} height={m.height}")
     assert [m.width, m.height] == [3, 2]
-    dbg_print(f"maze (out)...\n{m}")
+    dbg_print(f"maze (formatted)...\n{m}")
     assert str(m) == """
-[0,0, 1,0, 2,0]
-[0,1, 1,1, 2,1]
-""".lstrip()
-    ms = GridStr(m)
-    dbg_print(f"maze (formatted)...\n{ms}")
-    assert str(ms) == """
 +-----+-----+-----+
-| 0,0 | 1,0 | 2,0 |
-+-----+-----+-----+
-| 0,1 | 1,1 | 2,1 |
+| E   |     = O   |
++--H--+--H--+-----+
+|     =     =     |
 +-----+-----+-----+
 """.lstrip()
 
